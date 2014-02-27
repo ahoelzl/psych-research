@@ -167,7 +167,7 @@ getClusterNumberBias.simulation.methods <- function(types, methods, fa.ges) {
   for(m  in 1:length(methods)) {
     
     method <- methods[m]
-  descriptions<- paste0("Sim1 mit allen NL gleich und entsprechen Kommunalität (NL.equal)", "\n"
+  descriptions<- paste0("Sim1 mit allen NL gleich und entsprechen Kommunalität (NL.equal)", "\n", 
                         "Sim 2 bei einer NL und entsprechen Kommunalität (NL.one)", "\n",
                     "Sim3 bei zwei NL und entsprechen Kommunalität (NL.two)")
   

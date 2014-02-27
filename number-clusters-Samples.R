@@ -36,7 +36,7 @@ numcluadvanced <- function (data,nobs,nrep,type="kmeans") {
 
 #bestimmt für Stichproben der Größe nobs die Anzahl der Cluster
 #simuliert das ganze nrep map
-numcluadvanced.whole <- function (data,type="kmeans") {
+numcluadvanced.whole <- function (data,type="kmeans", numbermethod = "both") {
   
     
     daten.sp <- data
@@ -54,7 +54,7 @@ numcluadvanced.whole <- function (data,type="kmeans") {
     points.save <<- points
     type.save <<- type
 
-    number.cluster <- getClusterNumbers(points=points, cor.sp=cor, type=type)
+    number.cluster <- getClusterNumbers(points=points, cor.sp=cor, type=type, numbermethod)
  
     print( number.cluster)
     v <- number.cluster 
@@ -64,19 +64,37 @@ numcluadvanced.whole <- function (data,type="kmeans") {
 
 
 
-getClusterNumbers <- function(points,cor.sp, type="kmeans") {
+getClusterNumbers <- function(points,cor.sp, type="kmeans", numbermethod="both") {
+  
+  validationtype <- c("internal")
+  if(numbermethod %in% c("APN", "ADM", "AD", "FOM")) {
+    validationtype <- c("stability")
+  }
+  
+  if(numbermethod == "both") {
+    validationtype <- c("stability", "internal")
+  }
+  
   if(type=="kmeans" || type=="kmeansmds") {
-    result <- clValid(obj=points, nClust=2:15,clMethods="kmeans", validation=c("internal","stability"))
+    result <- clValid(obj=points, nClust=3:10,clMethods="kmeans", validation=c(validationtype))
+    result.names <-  measNames(result)
      result <-   as.numeric(as.character(optimalScores(result)[,3]))
+    names(result) <- result.names
   } else if(type=="complete" || type=="completecor" || type=="completecorcor") {
-    result <- clValid(obj=points, nClust=2:15,clMethods="hierarchical", validation=c("internal","stability"), method="complete")
+    result <- clValid(obj=points, nClust=3:10,clMethods="hierarchical", validation=c(validationtype), method="complete")
+    result.names <-  measNames(result)
+    
     result <-   as.numeric(as.character(optimalScores(result)[,3]))
+    names(result) <- result.names
   } else if(type=="average" || type=="averagecor" || type=="averagecorcor") {
-    result <- clValid(obj=points, nClust=2:15,clMethods="hierarchical", validation=c("internal","stability"), method="average")
+    result <- clValid(obj=points, nClust=3:10,clMethods="hierarchical", validation=c(validationtype), method="average")
+    result.names <-  measNames(result)
     result <-   as.numeric(as.character(optimalScores(result)[,3]))
+    names(result) <- result.names
   } else if(type=="faclust") {
     result <- EFA.Cluster.number(cor.sp = cor.sp)
   }
+
   result
 }
 
@@ -180,12 +198,12 @@ result.names <- c("whole", "Var", "Bias")
 }
 
 #nur laufen lassen wenn noch nicht vorhanden
-if(!exists("whole.cluster.number.kmeans")) {
+#if(!exists("whole.cluster.number.kmeans")) {
 whole.cluster.number.kmeans <- numcluadvanced.whole(facs, type="kmeans")
 whole.cluster.number.average <- numcluadvanced.whole(facs, type="average")
 whole.cluster.number.complete <- numcluadvanced.whole(facs, type="complete")
 whole.cluster.number.faclust <- numcluadvanced.whole(facs, type="faclust")
-}
+#}
 
 
 getClusterNumberBiasVariance.samples <- function(nrep, types) {

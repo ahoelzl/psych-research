@@ -5,7 +5,7 @@ library(psych)
 
 ## Datensatz besteht aus Ziffern, die durch kein Zeichen getrennt sind
 
-raw <- readLines("/home/andreas/Desktop/NEOPIR_Ost.TXT")
+raw <- readLines("NEOPIR_Ost.TXT")
 
 # Variablen werden einzeln extrahiert:
 
@@ -185,15 +185,28 @@ O6<-rowSums(NEOdf[,c(28,58,88,118,148,178,208,238)])
 A6<-rowSums(NEOdf[,c(29,59,89,119,149,179,209,239)])
 C6<-rowSums(NEOdf[,c(30,60,90,120,150,180,210,240)])
 
-
+set.seed(089)
 #N1, E2, O3, A4, C5
-  
+
 cols <- c(1,31,61,91,121,151,181,211, 7,37,67,97,127,157,187,217, 13,43,73,103,133,163,193,223,
                     19,49,79,109,139,169,199,229, 25,55,85,115,145,175,205,235)
 
-
-facs <- as.matrix((NEOdf[,cols]), ncols=48)
+####das wird normalerweise untersucht
+#facs <- as.matrix((NEOdf[,cols]), ncols=48)
 #facs <- as.data.frame(cbind(N1,N2,N3,N4,N5,N6,E1,E2,E3,E4,E5,E6,O1,O2,O3,O4,O5,O6,A1,A2,A3,A4,A5,A6,C1,C2,C3,C4,C5,C6))
+
+###C1, C2, C3, C4, C5
+#cols.c.only <- c(5,35,65,95,125,155,185,215,10,40,70,100,130,160,190,220,15,45,75,105,135,165,195,225
+#                 ,20,50,80,110,140,170,200,230, 25,55,85,115,145,175,205,235,30,60,90,120,150,180,210,240)
+
+#N2, E3, O4, A5, C1
+#cols.different.variation <- c(6,36,66,96,126,156,186,216, 12,42,72,102,132,162,192,222,
+#                              18,48,78,108,138,168,198,228, 24,54,84,114,144,174,204,234, 
+#                              5,35,65,95,125,155,185,215)
+
+#facs <- as.matrix((NEOdf[,cols]), ncols=48)
+facs <- as.matrix((NEOdf[,cols]), ncols=48)
+
 
 ## Analyse fehlender Werte
 

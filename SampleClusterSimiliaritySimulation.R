@@ -183,7 +183,7 @@ print(t(dataasmatrix))
 
 
 #corcorM <- cor(corM, use="pairwise.complete.obs", method="pearson")
-if(!exists("averagecor")) {
+#if(!exists("averagecor")) {
   k<-5
 averagecor <- averageCor(corM,k) 
 averagecorcor <- averageCorCor(corM,k) 
@@ -204,7 +204,7 @@ fclust <- fclustering(corM,k)
 #kmeansmdscor <- cmdsolveCor(corM,k)
 #kmeanscorcor <- kmeansCorCor(corM,k)
 #kmeansneucor <- kMeansOnDistancesCor(corM,k)
-}
+#}
 
 
 getClusterSimiliarity.samples <- function(nrep, numbercluster) {

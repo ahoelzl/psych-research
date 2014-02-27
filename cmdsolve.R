@@ -164,9 +164,12 @@ kMeansOnDistances <- function(corM,k=5) {
 
 
 
-cmdsolve <- function(corM,k=5) {
+cmdsolve <- function(corM,k=5, dim=0) {
   d <- getDist(corM,T)
-  dim <-  dim(corM)[1] - 1
+  dim.max <-  dim(corM)[1] - 1
+  if(dim == 0) {
+    dim <- dim.max
+  }
   dcomp <- getDist(corM,F)
   fit <- cmdscale(d,eig=TRUE, k=dim) # k is the number of dim
   fit # view results

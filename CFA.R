@@ -62,7 +62,11 @@ getClustering <- function(cor.sp, k, method) {
 
 
 
-getCFASimiliarity <- function(facs, nrep, nobs,method, numbermethod,daten.sp1, daten.sp2,  efa=F) {
+getCFASimiliarity <- function(facs, nobs,method, daten.sp1, daten.sp2,  efa=F) {
+  
+  
+  method.names.normal <- c("APN" ,"AD" ,"ADM" ,"FOM","Connectivity", "Dunn" ,"Silhouette")
+  
   measures <- c()
 
   #  daten.sp1 <- facs[sample(x=1:nrow(facs), size=nobs, replace=T),]
@@ -73,18 +77,21 @@ getCFASimiliarity <- function(facs, nrep, nobs,method, numbermethod,daten.sp1, d
 
     
 
-    number.cluster <- numcluadvanced.whole(daten.sp1, type=method)
+    number.clusters <- numcluadvanced.whole(daten.sp1, type=method)
 
-    method.names <- method.names.normal
-    if(efa) {
-      method.names <-method.names.EFA
+measures <- c()
+  
+    for(number.cluster in number.clusters) {
+
+    #names(number.cluster) <- method.names
+    cat("------------------------------", "\n")    
+
+    k <- number.cluster
+    
+    if(k == 0) {
+      k <- 1
     }
     
-
-    names(number.cluster) <- method.names
-    cat("------------------------------", "\n")    
-    cat(method, " und ", numbermethod, "\n")
-    k <- number.cluster[numbermethod]
     cat("k :", k)
     clustering <- getClustering(cor.sp1, k, method)
     cat("clustering :", clustering)
@@ -132,13 +139,21 @@ getCFASimiliarity <- function(facs, nrep, nobs,method, numbermethod,daten.sp1, d
     }
     
   
-meas
+measures <- append(measures, meas)
+    
+    }
+  
+  names(measures) <- names(number.clusters)
+  
+  measures
+  
+  
 }
 
 runCFR <- function(nrep, nobs, efa=F) {
 
 methods <- c("averagecor","completecor","averagecorcor", "completecorcor", "kmeansmds")
-clusternumber.names <- c("APN" ,"Silhouette")
+clusternumber.names <- c("APN", "AD" ,"ADM", "FOM","Connectivity", "Dunn"  ,       "Silhouette")  
 
 if(efa) {
   methods <- c("faclust")
@@ -152,23 +167,24 @@ rownames(results.matrix) <- clusternumber.names
 
 
 for(i  in 1:length(methods)) {
-  for(j in 1:length(clusternumber.names)) {
-    result <- c()
+result <- 0
 for(z in 1:nrep) {
     daten.sp1 <- facs[sample(x=1:nrow(facs), size=nobs, replace=T),]
-    daten.sp2 <- facs[sample(x=1:nrow(facs), size=nobs, replace=T),]
-    result <- append(result, getCFASimiliarity(facs, nrep=nrep, nobs=nobs, method=methods[i], numbermethod =clusternumber.names[j], efa=efa, daten.sp1 = daten.sp1,
-                                               daten.sp2 = daten.sp2))
+    ##daten.sp2 <- facs[sample(x=1:nrow(facs), size=nobs, replace=T),]
+    
+    ##das zweite keine Stichprobe sondern alle Daten
+    
+    daten.sp2 <- facs
+    
+    result <- result + getCFASimiliarity(facs, nobs=nobs, method=methods[i], efa=efa, daten.sp1 = daten.sp1,
+                                               daten.sp2 = daten.sp2)
 }
-    results.matrix[j,i] <- mean(result)
+result <- result/nrep
+    results.matrix[,i] <- result
   }
-}
 
 
-#names(results) <- methods
-###Normieren
 
-results.mean <- mean(results.matrix)
 
 
 #results.m <- t(as.matrix(results, 1)
@@ -177,14 +193,30 @@ paintTable(results.matrix, "BIC bei konfirmatorischer CFA", paste0("nrep ", nrep
 
 
 
-output.cor.matrices <- function(nrep = 100, size=200) {
+output.cor.matrices <- function(nrep = 100, size=c(100,200,500,1000)) {
+  
+  par(mfrow=c(1,length(size)))
+  for(s in size) {
+  cor.total.vector <- c()
+  
   for(i in 1:nrep) {
-  daten.sp1 <- facs[sample(x=1:nrow(facs), size=size, replace=T),]
+  daten.sp1 <- facs[sample(x=1:nrow(facs), size=s, replace=T),]
   
   cor.sp1 <- cor(as.matrix(daten.sp1), use="pairwise.complete.obs", method="pearson")
   
-  print(cor.sp1)
+  cor.total <- cor(as.matrix(facs), use="pairwise.complete.obs", method="pearson")
+
+  changed <- cor.sp1 - cor.total
+  
+  
+  cor.total.vector <- append(cor.total.vector, as.vector(changed))
+ 
   }
+  
+  hist(changed, main=paste0("size:", s))
+  
+}
+  
   
 }
 
