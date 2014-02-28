@@ -183,7 +183,7 @@ averageCorCorCor <- function(corM,k=5,show=F) {
 
 
 fclustering <- function(corM,k=5,show=F) {
-  fa.ges6 <- fa(corM, nfactors=5, max.iter=100, fm="ml", rotate="promax", method="pearson")
+  fa.ges6 <- fa(corM, nfactors=k, max.iter=100, fm="ml", rotate="promax", method="pearson")
   zuordnung.ges6 <- apply(fa.ges6$loadings,1,function(x) which.max(abs(x)))
   zuordnung.ges6
 }

@@ -52,13 +52,15 @@ paintTable <- function(table, title,footnote) {
 
 
 
-toSimulate <- c("faclust", "averagecor", "completecor", "averagecorcor", "completecorcor", "kmeansmds")
+toSimulate <- c("faclust", "averagecor", "completecor", "kmeansmds")
 method.names.EFA <<- c("MAP", "Paralell-mcomp", "Paralell-nfact", "AIC")
 method.names.normal <<- c("APN" ,"AD" ,"ADM" ,"FOM","Connectivity", "Dunn" ,"Silhouette")
 
+clusternumber.names <<- method.names.normal 
 
 allnobs <-c(100,200, 500,1000)
 
+runCFR(nrep=200, nobs=1000)
 
 test1 <- getClusterSimiliarity.simulation.methods(methods=c(1,2,3),zuordnung.ges, toSimulate, fa.ges) 
 
@@ -69,15 +71,8 @@ getClusterNumberBias.simulation.methods(types= c("kmeans", "average", "complete"
                                         methods=c(1,2,3), fa.ges)
 
 
-#getClusterNumberBias.simulation.methods.original(method=1, fa.ges)
-#getClusterNumberBias.simulation.methods.original(method=2, fa.ges)
-#getClusterNumberBias.simulation.methods.original(method=3, fa.ges)
-
 
 r1 <- getClusterNumberBiasVariance.samples(200,types= c("kmeans", "average", "complete", "faclust"))
 
 
-runCFR(nrep=200, nobs=1000, efa=T)
-
-runCFR(nrep=200, nobs=1000, efa=F)
 

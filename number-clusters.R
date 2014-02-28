@@ -48,11 +48,8 @@ numcluadvanced.whole <- function (data,type="kmeans") {
     points <- fit$points
     result <- getClusterNumbers(points=points, type=type)
     cat("result: ", result)
-    number.cluster <- as.numeric(as.character(optimalScores(result)[,3]))
 
-    v <- number.cluster 
- 
-    v
+  result
 }
 
 getClusterNumbers <- function(points, type="kmeans") {
@@ -63,13 +60,14 @@ getClusterNumbers <- function(points, type="kmeans") {
     result <- clValid(obj=points, nClust=2:15,clMethods="hierarchical", validation=c("internal","stability"), method="complete")
   } else if(type=="average" || type=="averagecor" || type=="averagecorcor") {
     result <- clValid(obj=points, nClust=2:15,clMethods="hierarchical", validation=c("internal","stability"), method="average")
-  } else if(type=="faclust") {
-    result <- EFA.Cluster.number(points=points)
-  } else {
+  }else {
    cat("not found! ", type)
    result <- 0
   }
-  result
+  
+  number.cluster <- as.numeric(as.character(optimalScores(result)[,3]))
+  names(number.cluster) <- method.names.normal
+  number.cluster
 }
 
 
