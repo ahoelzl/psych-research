@@ -184,7 +184,9 @@ getClusterNumberBias.simulation.methods <- function(types, methods, fa.ges) {
   zuordnung.ges <- apply(loads,1,function(x) which.max(abs(x)))
   
   Phi <- Phi.fixed(fa.ges$Phi, 0)
-  cor <- sim.structure(fx=loads,Phi=Phi,n=0)$model
+    
+   # for(z in 1:nrep) {
+  cor <- sim.structure(fx=loads,Phi=Phi,n=nobs)$model
   
  
 
@@ -215,8 +217,8 @@ getClusterNumberBias.simulation.methods <- function(types, methods, fa.ges) {
   }
   }
 
+ # }
   }
-  
   rownames(rs) <- colnames.rs
   paintTable(rs, "Clusteranzahlsabweichung bei EFA-Similation mit 5 Faktoren", 
              paste0(" \n ", descriptions)) 
@@ -227,4 +229,111 @@ getClusterNumberBias.simulation.methods <- function(types, methods, fa.ges) {
 
 #getClusterNumberBias.simulation(NL.mus,Kor.mus,type="kmeans")
 
+getClusterNumberBias.simulation.methods.samples <- function(types, methods, fa.ges, nobs=200, nrep=1000) {
+  
+  number.matrix1 <- matrix(nrow=nrep, ncol=25)
+  number.matrix2 <- matrix(nrow=nrep, ncol=25)
+  number.matrix3 <- matrix(nrow=nrep, ncol=25)
+  
+  for(c in 1:nrep) {
+  
+  r.names <- c()
+  descriptions <- ""
+  
+  rs <- matrix(nrow=(length(types)-1)*length(method.names) + length(method.names.EFA), ncol=2+length(methods))
+  colnames(rs) <- c("clustermethod", "clusternumber" , "Sim1", "Sim2", "Sim3")
+  
+  colnames.rs <- c()
+  
+  for(m  in 1:length(methods)) {
+    
+    method <- methods[m]
+    descriptions<- paste0("Sim1 mit allen NL gleich und entsprechen Kommunalität (NL.equal)", "\n", 
+                          "Sim 2 bei einer NL und entsprechen Kommunalität (NL.one)", "\n",
+                          "Sim3 bei zwei NL und entsprechen Kommunalität (NL.two)")
+    
+    loads <- NL.equal(fa.ges$loadings)
+    
+    # loads <- NL.fixed(fa.ges$loadings, 0.2)
+    
+    if(method==2) {
+      loads <- NL.one(fa.ges$loadings)
+    } else if(method == 3) {
+      loads <- NL.two(fa.ges$loadings)
+    }
+    
+    zuordnung.ges <- apply(loads,1,function(x) which.max(abs(x)))
+    
+    Phi <- Phi.fixed(fa.ges$Phi, 0)
+    
+    # for(z in 1:nrep) {
+    cor <- sim.structure(fx=loads,Phi=Phi, n=nobs, raw=T)$r
+    
+    
+    
+    
+    for(i in 1:(length(types))) {
+      r <- drawNumberClusterAdvanced.simulation(cor,1,types[i])
+      
+      cat("r: ", r)
+      method.names.size <- length(method.names)
+      
+      if(types[i]=="faclust") {
+        method.names.size <- length(method.names.EFA)
+      }
+      
+      for(mn in 1:method.names.size) {
+        rs[(i-1)*length(method.names) + mn,2+m] <- r[2,mn]
+        method.name <- method.names[mn]
+        if(mn == 1) {
+          rs[(i-1)*length(method.names) + mn,1] <- types[i]
+        } else {
+          rs[(i-1)*length(method.names) + mn,1] <- ""
+        }
+        if(types[i] == "faclust") {
+          rs[(i-1)*length(method.names) + mn,2] <- method.names.EFA[mn]
+        } else {
+          rs[(i-1)*length(method.names) + mn,2] <- method.names[mn]
+        }
+      }
+    }
+    
+    # }
+  }
+  
+  number.matrix1[c,] <- as.numeric(rs[,3])
+  number.matrix2[c,] <- as.numeric(rs[,4])
+  number.matrix3[c,] <- as.numeric(rs[,5])
+  
+  rownames(rs) <- colnames.rs
+  
+  
+  }
+  
+  rs.mean <- rs
+  rs.var <- rs
+  
+  mean1 <-   apply(number.matrix1, FUN=mean, MARGIN=2)
+  mean2 <-   apply(number.matrix2, FUN=mean, MARGIN=2)
+  mean3 <-   apply(number.matrix3, FUN=mean, MARGIN=2)
+  
+  rs.mean[,3] <- mean1
+  rs.mean[,4] <- mean2
+  rs.mean[,5] <- mean3
+  
+  
+  var1 <-   apply(number.matrix1, FUN=var, MARGIN=2)
+  var2 <-   apply(number.matrix2, FUN=var, MARGIN=2)
+  var3 <-   apply(number.matrix3, FUN=var, MARGIN=2)
+  
+  rs.var[,3] <- var1
+  rs.var[,4] <- var2
+  rs.var[,5] <- var3
+  
+  paintTable(rs.mean, "durchsch. Clusteranzahlsabweichung bei EFA-Similation mit 5 Faktoren", 
+             paste0(" \n ", descriptions)) 
+  
+  paintTable(rs.var, "Varianz der Clusteranzahlsabweichung bei EFA-Similation mit 5 Faktoren", 
+             paste0(" \n ", descriptions)) 
+}
 

@@ -176,11 +176,11 @@ for(i  in 1:length(methods)) {
 results <- matrix(0,ncol=(length(method.names.normal)+4), nrow=nrep)
 for(z in 1:nrep) {
     daten.sp1 <- facs[sample(x=1:nrow(facs), size=nobs, replace=T),]
-    ##daten.sp2 <- facs[sample(x=1:nrow(facs), size=nobs, replace=T),]
+  #  daten.sp2 <- facs[sample(x=1:nrow(facs), size=nobs, replace=T),]
     
     ##das zweite keine Stichprobe sondern alle Daten
     
-    daten.sp2 <- facs
+   daten.sp2 <- facs
     
     save.value <-  getCFASimiliarity(facs, nobs=nobs, method=methods[i], efa=efa, daten.sp1 = daten.sp1,
                                 daten.sp2 = daten.sp2)
@@ -210,6 +210,57 @@ paintTable(results.matrix, "BIC bei konfirmatorischer CFA", paste0("nrep ", nrep
 
 
 
+
+
+runCFR_random <- function(nrep, nobs) {
+  
+  methods <- c("efa" , "averagecor","completecor", "kmeansmds")
+  
+  
+  results <- c()
+  
+  results.matrix <- matrix(0, ncol=length(methods), nrow=length(method.names.normal)+4)
+  colnames(results.matrix) <- methods
+  
+  results.matrix.var <- matrix(0, ncol=length(methods), nrow=length(method.names.normal)+4)
+  colnames(results.matrix.var) <- methods
+  
+  
+  for(i  in 1:length(methods)) {
+    results <- matrix(0,ncol=(length(method.names.normal)+4), nrow=nrep)
+    for(z in 1:nrep) {
+      daten.sp1 <- matrix(sample(1:5, nobs*40, replace=T),nrow=nobs,ncol=40)
+      
+      daten.sp2 <- matrix(sample(1:5, nobs*40, replace=T),nrow=nobs,ncol=40)
+      
+      save.value <-  getCFASimiliarity(facs, nobs=nobs, method=methods[i], efa=efa, daten.sp1 = daten.sp1,
+                                       daten.sp2 = daten.sp2)
+      
+      if(length(save.value) == 4) {
+        results[z,] <- c(rep(0,length(method.names.normal)), save.value)
+      } else {
+        results[z,] <-save.value
+      }
+    }
+    
+    result <- apply(results, MARGIN=2, FUN=mean)
+    result.var <- apply(results, MARGIN=2, FUN=var)
+    
+    results.matrix[,i] <- result
+    
+    results.matrix.var[,i] <- result.var
+  }
+  
+  rownames(results.matrix) <- c(method.names.normal, method.names.EFA)
+  rownames(results.matrix.var) <- c(method.names.normal, method.names.EFA)
+  
+  paintTable(results.matrix.var, "Varianz des BIC bei konfirmatorischer CFA", paste0("nrep ", nrep))
+  #results.m <- t(as.matrix(results, 1)
+  paintTable(results.matrix, "BIC bei konfirmatorischer CFA", paste0("nrep ", nrep))
+}
+
+
+
 output.cor.matrices <- function(nrep = 100, size=c(100,200,500,1000)) {
   
   par(mfrow=c(1,length(size)))
@@ -219,7 +270,11 @@ output.cor.matrices <- function(nrep = 100, size=c(100,200,500,1000)) {
   for(i in 1:nrep) {
   daten.sp1 <- facs[sample(x=1:nrow(facs), size=s, replace=T),]
   
+  daten.sp1 <- facs[sample(x=1:nrow(facs), size=s, replace=T),]
+  
   cor.sp1 <- cor(as.matrix(daten.sp1), use="pairwise.complete.obs", method="pearson")
+  
+  cor.total <- cor(as.matrix(daten.sp2), use="pairwise.complete.obs", method="pearson")
   
   cor.total <- cor(as.matrix(facs), use="pairwise.complete.obs", method="pearson")
 

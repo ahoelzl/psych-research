@@ -264,8 +264,83 @@ getClusterSimiliarity.simulation.methods <- function(methods, zuordnung.ges,  to
   
   rownames(rs) <- c("Sim1", "Sim2", "Sim3")
   
+  
+  
+  
+  
+  
+  
   paintTable(rs, "Clusteruebereinstimmung bei EFA", paste0("\n" , descriptions))
   rs
 }
 
 
+###method 1 : NL alle gleich, ergeben zusammen Kommunalität
+####### nur eine NL; entspricht Kommunalität
+####### zwei, entsprechen zusammen Kommunalität
+getClusterSimiliarity.simulation.samples.methods <- function(methods, zuordnung.ges,  toSimulate, fa.ges, nobs, nrep) {
+  #compareClusterings <- function(NLmean,NLsd,phimean,phisd, comparing,toSimulate, nrep=1, addError=F) 
+  ##Die Bedingungen in den R's werden hier erzeugt
+  
+  rs.list <- list()
+  
+  for(c in 1:nrep) {
+  
+  r.names <- c()
+  descriptions <- ""
+  #for(i in 1:length(NL.mus)) {
+  #  r.names[i] <- paste0("constr ", i)
+  #  descriptions <- paste0(descriptions,  " und " , r.names[i] , " mit NL von ",
+  #                         NL.mus[i], " und Faktorkorrelation von ", Kor.mus[i], " \n  ")
+  #}
+  descriptions<- "bei allen NL gleich und entsprechen Kommunalität (NL.equal)"
+  
+  rs <- matrix(nrow= 3, ncol=length(toSimulate)) 
+  corM <- sim.structure(fx=loads,Phi=Phi, uniq=fa.ges$uniquenesses, n=nobs, raw=T)$r
+  for( i in 1:length(methods)) {
+    
+    method <- methods[i]  
+    
+    if(method==2) {
+      descriptions<- "bei einer NL und entsprechen Kommunalität (NL.one)"
+    } else if(method==3) {
+      descriptions<- "bei zwei NL und entsprechen Kommunalität (NL.two)"
+    }
+    
+    
+    colnames(rs) <- toSimulate
+    #for(i in 1:length(NL.mus))  {
+    #r1 <- compareClusterings(NL.mus[i],0,Kor.mus[i],0,1,toSimulates, addError=addError)
+    
+    
+    loads <- NL.equal(fa.ges$loadings)
+    
+    # loads <- NL.fixed(fa.ges$loadings, 0.2)
+    
+    if(method==2) {
+      loads <- NL.one(fa.ges$loadings)
+    } else if(method == 3) {
+      loads <- NL.two(fa.ges$loadings)
+    }
+    
+    
+    Phi <- fa.ges$Phi
+    
+    rs[i,] <- getResults(corM, toSimulate,zuordnung.ges, comparing=1)
+  }
+  
+  rownames(rs) <- c("Sim1", "Sim2", "Sim3")
+  rs.list[[c]] <- rs
+  }
+  
+  rs <- rs.list[[1]]
+  if(length(rs) > 1) {
+  for(l in 2:length(rs))
+  rs <- rs + rs.list[[l]]
+  }
+  rs <- rs/length(rs)
+  
+  
+  paintTable(rs, "Clusteruebereinstimmung bei EFA", paste0("\n" , descriptions))
+  rs
+}

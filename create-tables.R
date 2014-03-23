@@ -14,7 +14,7 @@ addError <- F
 paintTable <- function(table, title,footnote) {
 
   title <- gsub(" ", "", title)
-  filename <- paste0("currentresults2/",title,".jpeg")
+  filename <- paste0("currentresults/",title,".jpeg")
   print(filename)
   jpeg(filename, width=1000, height=1000)
   
@@ -60,10 +60,10 @@ clusternumber.names <<- method.names.normal
 
 allnobs <-c(100,200, 500,1000)
 
-runCFR(nrep=200, nobs=1000)
+runCFR(nrep=200, nobs=100)
 
 test1 <- getClusterSimiliarity.simulation.methods(methods=c(1,2,3),zuordnung.ges, toSimulate, fa.ges) 
-
+test2 <- getClusterSimiliarity.simulation.samples.methods(methods=c(1,2,3), zuordnung.ges,  toSimulate, fa.ges, nobs=1000, nrep=100)
 
 getClusterSimiliarity.samples(nrep=200,numbercluster=5)
 
