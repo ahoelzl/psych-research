@@ -130,7 +130,7 @@ EFA.Cluster.number <- function(cor.sp) {
 
 
 
-drawNumberClusterAdvanced<- function(facs,nrep, type="kmeans", nobs = c(500)) {
+drawNumberClusterAdvanced<- function(facs,nrep, type="kmeans", nobs = 200) {
 
   whole.cluster.number <- c()
 if(type=="kmeans")   {
@@ -154,7 +154,7 @@ result.names <- c("whole", "Var", "Bias")
   colnames(resultsmatrix) <- method.names
 
   for(o in 1:length(nobs)) {
-  vector <- as.vector(numcluadvanced(data=facs, nobs=nobs[o], nrep=nrep, type=type))
+  vector <- as.vector(numcluadvanced(data=facs, nobs=nobs, nrep=nrep, type=type))
 
     m <- matrix( ncol=length(vector), nrow=length(vector[[1]]))
     
@@ -206,7 +206,7 @@ whole.cluster.number.faclust <- numcluadvanced.whole(facs, type="faclust")
 #}
 
 
-getClusterNumberBiasVariance.samples <- function(nrep, types) {
+getClusterNumberBiasVariance.samples <- function(nrep, types, nobs) {
   
   rs <- matrix(nrow = 5, ncol= (length(types) - 1) * length(method.names) + length( method.names.EFA)  )
   rs[1, ] <- ""
@@ -216,8 +216,9 @@ for(i in 1:(length(types))) {
   
   
   type <- types[i]
-r1 <- drawNumberClusterAdvanced(facs,nrep=nrep, type=type)
-  globalsave[[i]] <<- r1
+#r1 <- drawNumberClusterAdvanced(facs,nrep=nrep, type=type, nobs=nobs)
+ # globalsave[[i]] <<- r1
+  r1 <- globalsave[[i]]
   cat(paste0("type : ", type, " ", r1))
 rs[1, (i-1) * length(method.names) + 1] <- types[i]
   if(type=="faclust") {

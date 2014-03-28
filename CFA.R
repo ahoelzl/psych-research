@@ -77,7 +77,7 @@ getCFASimiliarity <- function(facs, nobs,method, daten.sp1, daten.sp2,  efa=F) {
 
     
     if(method=="faclust" || method=="efa") {
-      number.clusters <- EFA.Cluster.number(daten.sp1)
+      number.clusters <- EFA.Cluster.number(cor.sp1)
       names(number.clusters) <- method.names.EFA
     }else {
       number.clusters <- numcluadvanced.whole(daten.sp1, type=method)
@@ -158,9 +158,8 @@ measures <- append(measures, meas)
   
 }
 
-runCFR <- function(nrep, nobs) {
+runCFR <- function(nrep, nobs, methods = c("efa" , "averagecor","completecor", "kmeansmds")) {
 
-methods <- c("efa" , "averagecor","completecor", "kmeansmds")
 
 
 results <- c()
@@ -212,9 +211,8 @@ paintTable(results.matrix, "BIC bei konfirmatorischer CFA", paste0("nrep ", nrep
 
 
 
-runCFR_random <- function(nrep, nobs) {
+runCFR_random <- function(nrep, nobs, methods = c("efa" , "averagecor","completecor", "kmeansmds")) {
   
-  methods <- c("efa" , "averagecor","completecor", "kmeansmds")
   
   
   results <- c()
@@ -229,9 +227,12 @@ runCFR_random <- function(nrep, nobs) {
   for(i  in 1:length(methods)) {
     results <- matrix(0,ncol=(length(method.names.normal)+4), nrow=nrep)
     for(z in 1:nrep) {
-      daten.sp1 <- matrix(sample(1:5, nobs*40, replace=T),nrow=nobs,ncol=40)
+      daten.sp1 <- facs[sample(x=1:nrow(facs), size=nobs, replace=T),]
+        daten.sp2 <- facs[sample(x=1:nrow(facs), size=nobs, replace=T),]
       
-      daten.sp2 <- matrix(sample(1:5, nobs*40, replace=T),nrow=nobs,ncol=40)
+      ##das zweite keine Stichprobe sondern alle Daten
+      
+      #daten.sp2 <- facs
       
       save.value <-  getCFASimiliarity(facs, nobs=nobs, method=methods[i], efa=efa, daten.sp1 = daten.sp1,
                                        daten.sp2 = daten.sp2)

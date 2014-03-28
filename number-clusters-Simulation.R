@@ -237,6 +237,10 @@ getClusterNumberBias.simulation.methods.samples <- function(types, methods, fa.g
   
   for(c in 1:nrep) {
   
+    print("-----------------")
+    print(c)
+    print("-----------------")
+    
   r.names <- c()
   descriptions <- ""
   

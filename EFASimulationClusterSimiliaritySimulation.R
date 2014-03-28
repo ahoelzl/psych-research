@@ -296,7 +296,8 @@ getClusterSimiliarity.simulation.samples.methods <- function(methods, zuordnung.
   descriptions<- "bei allen NL gleich und entsprechen Kommunalität (NL.equal)"
   
   rs <- matrix(nrow= 3, ncol=length(toSimulate)) 
-  corM <- sim.structure(fx=loads,Phi=Phi, uniq=fa.ges$uniquenesses, n=nobs, raw=T)$r
+
+
   for( i in 1:length(methods)) {
     
     method <- methods[i]  
@@ -313,8 +314,9 @@ getClusterSimiliarity.simulation.samples.methods <- function(methods, zuordnung.
     #r1 <- compareClusterings(NL.mus[i],0,Kor.mus[i],0,1,toSimulates, addError=addError)
     
     
+ 
     loads <- NL.equal(fa.ges$loadings)
-    
+    Phi <- fa.ges$Phi
     # loads <- NL.fixed(fa.ges$loadings, 0.2)
     
     if(method==2) {
@@ -323,8 +325,8 @@ getClusterSimiliarity.simulation.samples.methods <- function(methods, zuordnung.
       loads <- NL.two(fa.ges$loadings)
     }
     
-    
-    Phi <- fa.ges$Phi
+    corM <- sim.structure(fx=loads,Phi=Phi, uniq=fa.ges$uniquenesses, n=nobs, raw=T)$r
+ 
     
     rs[i,] <- getResults(corM, toSimulate,zuordnung.ges, comparing=1)
   }
@@ -334,13 +336,14 @@ getClusterSimiliarity.simulation.samples.methods <- function(methods, zuordnung.
   }
   
   rs <- rs.list[[1]]
-  if(length(rs) > 1) {
-  for(l in 2:length(rs))
+  if(length(rs.list) > 1) {
+  for(l in 2:length(rs.list)) {
   rs <- rs + rs.list[[l]]
   }
-  rs <- rs/length(rs)
+  }
+  rs <- rs/length(rs.list)
   
   
-  paintTable(rs, "Clusteruebereinstimmung bei EFA", paste0("\n" , descriptions))
+  paintTable(rs, "Clusteruebereinstimmung bei EFA-Stichproben", paste0("\n" , descriptions))
   rs
 }
