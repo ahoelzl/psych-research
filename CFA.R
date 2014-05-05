@@ -4,7 +4,7 @@ library(clValid)
 
 
 
-getClustering <- function(cor.sp, k, method) {
+getClustering <- function(cor.sp, k, method, daten.sp=NULL) {
   cut.sp1 <- c()
   if(method=="completecor")  {
     cut.sp1 <- completeCor(cor.sp,k)
@@ -56,32 +56,40 @@ getClustering <- function(cor.sp, k, method) {
     cut.sp1  <- kMeansOnDistancesCor(cor.sp,k)
   } else if(method=="faclust" || method=="efa") {
     cut.sp1 <- fclustering(cor.sp,k)
+  } else if(method=="clustofvar") {
+    cut.sp1 <- varClust(daten.sp,k)
   }
   cut.sp1
 }
 
 
 
-getCFASimiliarity <- function(facs, nobs,method, daten.sp1, daten.sp2,  efa=F) {
+getCFASimiliarity <- function(facs, nobs,methods, daten.sp1, daten.sp2,  efa=F) {
   
+  results <- matrix(0,nrow=length(method.names.normal)+4, ncol=6)
+  #  daten.sp1 <- facs[sample(x=1:nrow(facs), size=nobs, replace=T),]
+  cor.sp1 <- cor(as.matrix(daten.sp1), use="pairwise.complete.obs", method="pearson")
   
-  method.names.normal <- c("APN" ,"AD" ,"ADM" ,"FOM","Connectivity", "Dunn" ,"Silhouette")
+  efa.cluster.number <-  EFA.Cluster.number(cor.sp1, n=nobs)
+  for(h  in 1:length(methods)) {
+    method <- methods[h]
+    
+  method.names.normal <- c("Connectivity", "Dunn" ,"Silhouette")
   
   measures <- c()
 
-  #  daten.sp1 <- facs[sample(x=1:nrow(facs), size=nobs, replace=T),]
-    cor.sp1 <- cor(as.matrix(daten.sp1), use="pairwise.complete.obs", method="pearson")
+  
     
   #  daten.sp2 <- facs[sample(x=1:nrow(facs), size=nobs, replace=T),]
     cor.sp2 <- cor(as.matrix(daten.sp2), use="pairwise.complete.obs", method="pearson")
 
     
     if(method=="faclust" || method=="efa") {
-      number.clusters <- EFA.Cluster.number(cor.sp1)
+      number.clusters <-  efa.cluster.number
       names(number.clusters) <- method.names.EFA
-    }else {
-      number.clusters <- numcluadvanced.whole(daten.sp1, type=method)
-      number.clusters <- append(number.clusters, EFA.Cluster.number(daten.sp1))
+    } else {
+      number.clusters <- numcluadvanced.whole(daten.sp1, type=method, n=nobs)
+      number.clusters <- append(number.clusters,  efa.cluster.number)
       names(number.clusters) <- c(method.names.normal, method.names.EFA)
     }
     
@@ -100,7 +108,7 @@ measures <- c()
     }
     
     cat("k :", k)
-    clustering <- getClustering(cor.sp1, k, method)
+    clustering <- getClustering(cor.sp1, k, method, daten.sp=daten.sp1)
     cat("clustering :", clustering)
     latent.zuweisung <- ''
     
@@ -125,7 +133,7 @@ measures <- c()
     
     frame <- as.data.frame(cor.sp2)
     
-    fit <- cfa(latent.zuweisung,data = frame)
+    fit <- cfa(latent.zuweisung,data = frame, control=list(rel.tol =  1e-5))
   
     cat("beforelogLk")
     
@@ -133,8 +141,9 @@ measures <- c()
       
     if(  class(test) == "try-error")  {
 
-      print("error thrown")
-      meas <- -1
+      
+      results <- matrix(0,nrow=length(method.names.normal)+4, ncol=5)
+      return(results)
     } else {
       cat("before meas")
     meas <- fitMeasures(fit, c("BIC"))
@@ -145,20 +154,21 @@ measures <- c()
     cat("------------", "\n")
     }
     
-  
-measures <- append(measures, meas)
+      w <- 0
+  if(method == "efa") {
+    w <- 3
+  }
+results[w+u,h] <- meas
     
     }
-  
+  }
 
-  
-  names(measures) <- names(number.clusters)
-  measures
+ results
   
   
 }
 
-runCFR <- function(nrep, nobs, methods = c("efa" , "averagecor","completecor", "kmeansmds")) {
+runCFR <- function(nrep, nobs, methods = c("efa", "averagecor","completecor", "kmeansmds", "kmeanscor", "clustofvar")) {
 
 
 
@@ -169,44 +179,50 @@ colnames(results.matrix) <- methods
 
 results.matrix.var <- matrix(0, ncol=length(methods), nrow=length(method.names.normal)+4)
 colnames(results.matrix.var) <- methods
+####simulate the data
 
+samples <- list()
+for(i in 1:nrep) {
+  samples[[i]] <- sample(x=1:nrow(facs), size=nobs, replace=T)
+}
 
-for(i  in 1:length(methods)) {
-results <- matrix(0,ncol=(length(method.names.normal)+4), nrow=nrep)
+resultlist <- list()
+
+s <- matrix(0,nrow=length(method.names.normal)+4, ncol=6)
 for(z in 1:nrep) {
-    daten.sp1 <- facs[sample(x=1:nrow(facs), size=nobs, replace=T),]
+    daten.sp1 <- facs[samples[[z]],]
   #  daten.sp2 <- facs[sample(x=1:nrow(facs), size=nobs, replace=T),]
     
     ##das zweite keine Stichprobe sondern alle Daten
     
    daten.sp2 <- facs
     
-    save.value <-  getCFASimiliarity(facs, nobs=nobs, method=methods[i], efa=efa, daten.sp1 = daten.sp1,
+    save.value <-  getCFASimiliarity(facs, nobs=nobs, methods=methods, efa=efa, daten.sp1 = daten.sp1,
                                 daten.sp2 = daten.sp2)
+
     
-    if(length(save.value) == 4) {
-      results[z,] <- c(rep(0,length(method.names.normal)), save.value)
-    } else {
-    results[z,] <-save.value
+    save.value
+    rownames(save.value) <- c(method.names.normal, method.names.EFA)
+    colnames(save.value) <- methods
+    
+    if(save.value[4,4]==0) {
+      z <- z - 1
+      next;
     }
+    
+    s <- s + save.value
+   # resultlist[[z]] <- save.value
+    
 }
 
-result <- apply(results, MARGIN=2, FUN=mean)
-result.var <- apply(results, MARGIN=2, FUN=var)
+s <- s/nrep
 
-  results.matrix[,i] <- result
 
-results.matrix.var[,i] <- result.var
-  }
 
-rownames(results.matrix) <- c(method.names.normal, method.names.EFA)
-rownames(results.matrix.var) <- c(method.names.normal, method.names.EFA)
-
-paintTable(results.matrix.var, "Varianz des BIC bei konfirmatorischer CFA", paste0("nrep ", nrep))
+paintTable(s, "Varianz des BIC bei konfirmatorischer CFA", paste0("nrep ", nrep))
 #results.m <- t(as.matrix(results, 1)
-paintTable(results.matrix, "BIC bei konfirmatorischer CFA", paste0("nrep ", nrep))
+paintTable(s, "BIC bei konfirmatorischer CFA", paste0("nrep ", nrep, " nobs ", nobs))
 }
-
 
 
 
@@ -237,6 +253,10 @@ runCFR_random <- function(nrep, nobs, methods = c("efa" , "averagecor","complete
       save.value <-  getCFASimiliarity(facs, nobs=nobs, method=methods[i], efa=efa, daten.sp1 = daten.sp1,
                                        daten.sp2 = daten.sp2)
       
+      if(save.value[5,5] == 0) {
+        next
+      }
+      
       if(length(save.value) == 4) {
         results[z,] <- c(rep(0,length(method.names.normal)), save.value)
       } else {
@@ -255,9 +275,9 @@ runCFR_random <- function(nrep, nobs, methods = c("efa" , "averagecor","complete
   rownames(results.matrix) <- c(method.names.normal, method.names.EFA)
   rownames(results.matrix.var) <- c(method.names.normal, method.names.EFA)
   
-  paintTable(results.matrix.var, "Varianz des BIC bei konfirmatorischer CFA", paste0("nrep ", nrep))
+  paintTable(results.matrix.var, "Varianz des BIC bei konfirmatorischer CFA_random", paste0("nrep ", nrep))
   #results.m <- t(as.matrix(results, 1)
-  paintTable(results.matrix, "BIC bei konfirmatorischer CFA", paste0("nrep ", nrep))
+  paintTable(results.matrix, "BIC bei konfirmatorischer CFA_random", paste0("nrep ", nrep, " nobs ", nobs))
 }
 
 

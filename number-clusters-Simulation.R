@@ -7,7 +7,7 @@ source("Vergleichsverfahren.R")
 
 #bestimmt für Stichproben der Größe nobs die Anzahl der Cluster
 #simuliert das ganze nrep map
-numcluadvanced.simulation <- function (cor,nrep,type="kmeans") {
+numcluadvanced.simulation <- function (cor,nrep,type="kmeans", n) {
   
   v <- c()
   for (i in 1:nrep){
@@ -18,7 +18,7 @@ numcluadvanced.simulation <- function (cor,nrep,type="kmeans") {
     fit <- cmdscale(d=dist,eig=TRUE, k=dim) # k is the number of dim
     points <- fit$points
 
-    number.cluster  <<- getClusterNumbers(points=points, cor.sp=cor, type=type)
+    number.cluster  <<- getClusterNumbers(points=points, cor.sp=cor, type=type, n=n)
 
     
     print( number.cluster)
@@ -29,15 +29,20 @@ numcluadvanced.simulation <- function (cor,nrep,type="kmeans") {
 
 
 
-drawNumberClusterAdvanced.simulation <- function(cor,nrep, type="kmeans") {
+drawNumberClusterAdvanced.simulation <- function(cor,nrep, type="kmeans",n) {
   
   whole.cluster.number <- c()
 
     whole.cluster.number <- c(5,5,5,5,5,5,5)
   
+  if(type %in% c("efa", "faclust")) {
+    method.names <- method.names.EFA
+  } else {
+    method.names <- method.names.normal
+  }
   
   result.names <- c("whole", "Bias")  
-  nobs <- c(500)
+
   
   
   resultsmatrix <- matrix(nrow=length(result.names), ncol=length(method.names))
@@ -45,7 +50,7 @@ drawNumberClusterAdvanced.simulation <- function(cor,nrep, type="kmeans") {
   colnames(resultsmatrix) <- method.names
   
   for(o in 1:length(nobs)) {
-    vector <- as.vector(numcluadvanced.simulation(cor, nrep=nrep, type=type))
+    vector <- as.vector(numcluadvanced.simulation(cor, nrep=nrep, type=type, n=n))
     
     m <- matrix( ncol=length(vector), nrow=length(vector[[1]]))
     
@@ -146,7 +151,7 @@ getClusterNumberBias.simulation.methods.original <- function(method, fa.ges) {
   
   
   for(i in 1:length(types)) {
-    r <- drawNumberClusterAdvanced.simulation(corM,1,types[i])
+    r <<- drawNumberClusterAdvanced.simulation(corM,1,types[i])
     rs[i,] <- r[2,]
   }
   
@@ -166,7 +171,7 @@ getClusterNumberBias.simulation.methods <- function(types, methods, fa.ges) {
   
   for(m  in 1:length(methods)) {
     
-    method <- methods[m]
+  method <- methods[m]
   descriptions<- paste0("Sim1 mit allen NL gleich und entsprechen Kommunalität (NL.equal)", "\n", 
                         "Sim 2 bei einer NL und entsprechen Kommunalität (NL.one)", "\n",
                     "Sim3 bei zwei NL und entsprechen Kommunalität (NL.two)")
@@ -192,7 +197,7 @@ getClusterNumberBias.simulation.methods <- function(types, methods, fa.ges) {
 
   
   for(i in 1:(length(types))) {
-  r <- drawNumberClusterAdvanced.simulation(cor,1,types[i])
+  r <- drawNumberClusterAdvanced.simulation(cor,1,types[i], n=100)
 
   cat("r: ", r)
   method.names.size <- length(method.names)
@@ -231,9 +236,9 @@ getClusterNumberBias.simulation.methods <- function(types, methods, fa.ges) {
 
 getClusterNumberBias.simulation.methods.samples <- function(types, methods, fa.ges, nobs=200, nrep=1000) {
   
-  number.matrix1 <- matrix(nrow=nrep, ncol=25)
-  number.matrix2 <- matrix(nrow=nrep, ncol=25)
-  number.matrix3 <- matrix(nrow=nrep, ncol=25)
+  number.matrix1 <- matrix(nrow=nrep, ncol=16)
+  number.matrix2 <- matrix(nrow=nrep, ncol=16)
+  number.matrix3 <- matrix(nrow=nrep, ncol=16)
   
   for(c in 1:nrep) {
   
@@ -277,7 +282,7 @@ getClusterNumberBias.simulation.methods.samples <- function(types, methods, fa.g
     
     
     for(i in 1:(length(types))) {
-      r <- drawNumberClusterAdvanced.simulation(cor,1,types[i])
+      r <- drawNumberClusterAdvanced.simulation(cor,1,types[i], n=nobs)
       
       cat("r: ", r)
       method.names.size <- length(method.names)
@@ -338,6 +343,6 @@ getClusterNumberBias.simulation.methods.samples <- function(types, methods, fa.g
              paste0(" \n ", descriptions)) 
   
   paintTable(rs.var, "Varianz der Clusteranzahlsabweichung bei EFA-Similation mit 5 Faktoren", 
-             paste0(" \n ", descriptions)) 
+             paste0(" \n ", descriptions, " nrep ", nrep, " nobs ", nobs)) 
 }
 

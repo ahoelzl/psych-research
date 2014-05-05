@@ -344,6 +344,6 @@ getClusterSimiliarity.simulation.samples.methods <- function(methods, zuordnung.
   rs <- rs/length(rs.list)
   
   
-  paintTable(rs, "Clusteruebereinstimmung bei EFA-Stichproben", paste0("\n" , descriptions))
+  paintTable(rs, "Clusteruebereinstimmung bei EFA-Stichproben", paste0("\n" , descriptions, " nrep ", nrep, " nobs ", nobs))
   rs
 }

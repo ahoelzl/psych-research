@@ -67,6 +67,8 @@ simulate <- function(cor.sp,nobs,nrep,k,method,wholecut,compareMethod,data,...) 
       cut.sp1  <- kMeansOnDistancesCor(cor.sp,k)
     } else if(method=="faclust") {
       cut.sp1 <- fclustering(cor.sp,k)
+    } else if(method=="clustofvar") {
+      cut.sp1 <- varClust(data,k)
     }
 
   print(cut.sp1)
@@ -191,7 +193,9 @@ completecor <- completeCor(corM,k)
 completecorcor <- completeCorCor(corM,k)
 kmeansmds <- cmdsolve(corM,k)
 
-#kmeanscor <- kmeansCor(corM,k)
+
+varclust <- varClust(facs, k)
+kmeanscor <- kmeansCor(corM,k)
 #averagecornometric <- averageCorNoMetric(corM,k) 
 #averagecorcornometric <- averageCorCorNoMetric(corM,k) 
 #completecornometric <- completeCorNoMetric(corM,k)
@@ -217,7 +221,7 @@ getClusterSimiliarity.samples <- function(nrep, numbercluster) {
 
 
 compareWith <- list("averagecor" =averagecor, "completecor" = completecor, "averagecorcor" = averagecorcor,
-                    "completecorcor"= completecorcor,"kmeansmds" = kmeansmds, "faclust" = fclust)
+                    "completecorcor"= completecorcor,"kmeansmds" = kmeansmds, "faclust" = fclust, "kmeanscor" = kmeanscor, "clustofvar"=varclust)
 
 
 

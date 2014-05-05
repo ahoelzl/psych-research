@@ -52,27 +52,34 @@ paintTable <- function(table, title,footnote) {
 
 
 
-toSimulate <- c("faclust", "averagecor", "completecor", "kmeansmds")
+toSimulate <- c("faclust", "averagecor", "completecor", "kmeansmds", "kmeanscor", "clustofvar")
 method.names.EFA <<- c("MAP", "Paralell-mcomp", "Paralell-nfact", "AIC")
-method.names.normal <<- c("APN" ,"AD" ,"ADM" ,"FOM","Connectivity", "Dunn" ,"Silhouette")
+method.names.normal <<- c("Connectivity", "Dunn" ,"Silhouette")
 
 clusternumber.names <<- method.names.normal 
-
+method.names <- method.names.normal
 allnobs <-c(100,200, 500,1000)
 
-#runCFR(nrep=200, nobs=100)
+nrep <- 5
+nobs <- 100
+numbercluster <- 5
+
+runCFR(nrep=nrep, nobs=nobs)
 
 test1 <- getClusterSimiliarity.simulation.methods(methods=c(1,2,3),zuordnung.ges, toSimulate, fa.ges) 
-test2 <- getClusterSimiliarity.simulation.samples.methods(methods=c(1,2,3), zuordnung.ges,  toSimulate, fa.ges, nobs=200, nrep=1000)
+test2 <- getClusterSimiliarity.simulation.samples.methods(methods=c(1,2,3), zuordnung.ges,  toSimulate, fa.ges, nobs=nobs, nrep=nrep)
 
-getClusterSimiliarity.samples(nrep=1000,numbercluster=5)
-
-getClusterNumberBias.simulation.methods(types= c("kmeans", "average", "complete", "faclust"), 
-                                        methods=c(1,2,3), fa.ges)
+getClusterSimiliarity.samples(nrep=nrep,numbercluster=numbercluster)
 
 
-r1 <- getClusterNumberBias.simulation.methods.samples(types= c("kmeans", "average", "complete", "faclust"),
-                                                      methods=c(1,2,3), fa.ges,  nobs=200,nrep=200)
+res <- getClusterNumberBiasVariance.samples(nrep=nrep, types= c("kmeans", "average", "complete","kmeanscor", "faclust"), nobs=nobs)
+
+res <- getClusterNumberBias.simulation.methods(types= c("kmeans", "average", "complete", "kmeanscor","faclust"), 
+                                       methods=c(1,2,3), fa.ges)
+
+
+r1 <- getClusterNumberBias.simulation.methods.samples(types= c("kmeans", "average", "complete","kmeanscor", "faclust"),
+                                                      methods=c(1,2,3), fa.ges,  nobs=nobs, nrep=nrep)
 
 
 

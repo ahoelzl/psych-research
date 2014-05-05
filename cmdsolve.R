@@ -175,6 +175,19 @@ cmdsolve <- function(corM,k=5, dim=0) {
   fit # view results
   clustering <- kmeans(fit$points, centers=k,nstart=300)
   kmeans <- clustering$cluster
+  
+  distmatrix <- matrix(0, nrow=k,ncol=dim(fit$points)[1])
+  
+  for(i in 1:k) {
+    for(j in 1:dim(fit$points)[1]) {
+      distance <- sum((clustering$centers[i,] - fit$points[j,])^2)
+      distmatrix[i,j] <- distance
+    }
+  }
+  
+  colnames(distmatrix) <- rownames(fit$points)
+  distmatrix <- t(distmatrix)
+  
   names(kmeans) <- rownames(corM)
   kmeans
 }
@@ -223,4 +236,11 @@ kMeansOnDistancesCor <- function(corM,k=5) {
   kmeans <- clustering$cluster
   names(kmeans) <- rownames(corM)
   kmeans
+}
+
+
+varClust <- function(cor.sp,k) {
+  tree <- hclustvar(cor.sp)
+  P3<-cutreevar(tree,k)
+  P3$cluster
 }
