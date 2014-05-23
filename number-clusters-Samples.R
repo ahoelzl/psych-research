@@ -75,30 +75,65 @@ getClusterNumbers <- function(points,cor.sp, type="kmeans", numbermethod="intern
     validationtype <- c("stability", "internal")
   }
   
+  dims <- dim(cor.sp)[1]
+  minv <- min(dims-1, 10)
+  
   if(type=="kmeans" || type=="kmeansmds") {
-    result <- clValid(obj=points, nClust=3:10,clMethods="kmeans", validation=c(validationtype))
+    result <- clValid(obj=points, nClust=2:minv,clMethods="kmeans", validation=c(validationtype), verbose=T)
     result.names <-  measNames(result)
-     result <-   as.numeric(as.character(optimalScores(result)[,3]))
+     #result <-   as.numeric(as.character(optimalScores(result)[,3]))
+    measures <- measures(result)
+    mins <-  apply(measures,1, function(x)  which(x == min(x)))
+    maxs <- apply(measures,1, function(x)  which(x == max(x)))
+    
+    result <- c(unlist(mins[1])[1] + 1 , unlist(maxs[2])[1] + 1 ,unlist(maxs[3])[1]+1)
+    if(is.na(result[1])) {
+    result[1] <- 2
+    }
     names(result) <- result.names
   } else if(type=="complete" || type=="completecor" || type=="completecorcor") {
-    result <- clValid(obj=points, nClust=3:10,clMethods="hierarchical", validation=c(validationtype), method="complete")
+    result <- clValid(obj=points, nClust=2:minv,clMethods="hierarchical", validation=c(validationtype), method="complete")
     result.names <-  measNames(result)
     
-    result <-   as.numeric(as.character(optimalScores(result)[,3]))
+    #result <-   as.numeric(as.character(optimalScores(result)[,3]))
+    measures <- measures(result)
+    mins <-  apply(measures,1, function(x)  which(x == min(x)))
+    maxs <- apply(measures,1, function(x)  which(x == max(x)))
+    
+    result <- c(unlist(mins[1])[1] + 1 , unlist(maxs[2])[1] + 1 ,unlist(maxs[3])[1]+1)
+    if(is.na(result[1])) {
+      result[1] <- 2
+    }
     names(result) <- result.names
   } else if(type=="average" || type=="averagecor" || type=="averagecorcor") {
-    result <- clValid(obj=points, nClust=3:10,clMethods="hierarchical", validation=c(validationtype), method="average")
+    result <- clValid(obj=points, nClust=2:minv,clMethods="hierarchical", validation=c(validationtype), method="average")
     result.names <-  measNames(result)
-    result <-   as.numeric(as.character(optimalScores(result)[,3]))
+    #result <-   as.numeric(as.character(optimalScores(result)[,3]))
+    measures <- measures(result)
+    mins <-  apply(measures,1, function(x)  which(x == min(x)))
+    maxs <- apply(measures,1, function(x)  which(x == max(x)))
+    
+    result <- c(unlist(mins[1])[1] + 1 , unlist(maxs[2])[1] + 1 ,unlist(maxs[3])[1]+1)
+    if(is.na(result[1])) {
+      result[1] <- 2
+    }
     names(result) <- result.names
   } else if(type=="faclust") {
     result <- EFA.Cluster.number(cor.sp = cor.sp, n=n)
     ##(type=="kmeanscor")
   } else  {
   
-    result <- clValid(obj=cor.sp, nClust=3:10,clMethods="kmeans", validation=c(validationtype))
+    result <- clValid(obj=cor.sp, nClust=2:minv,clMethods="kmeans", validation=c(validationtype))
     result.names <-  measNames(result)
-    result <-   as.numeric(as.character(optimalScores(result)[,3]))
+    #result <-   as.numeric(as.character(optimalScores(result)[,3]))
+    measures <- measures(result)
+    mins <-  apply(measures,1, function(x)  which(x == min(x)))
+    maxs <- apply(measures,1, function(x)  which(x == max(x)))
+    
+    result <- c(unlist(mins[1])[1] + 1 , unlist(maxs[2])[1] + 1 ,unlist(maxs[3])[1]+1)
+    if(is.na(result[1])) {
+      result[1] <- 2
+    }
     names(result) <- result.names
   }
 
@@ -109,10 +144,10 @@ getClusterNumbers <- function(points,cor.sp, type="kmeans", numbermethod="intern
 
 EFA.Cluster.number <- function(cor.sp, n) {
   
-  
+  cat("n ", n)
   data <- cor.sp
   daten.sp <- cor.sp
-  map.sp <- VSS(daten.sp, rotate = "promax", fm = "mle", title="Anzahl der Faktoren", plot=F,  n.obs=n)
+  map.sp <- VSS(daten.sp, rotate = "promax", fm = "mle", title="Anzahl der Faktoren", plot=F, n.obs=n)
   map <-    which.min(map.sp$map)
   
   
@@ -121,13 +156,17 @@ EFA.Cluster.number <- function(cor.sp, n) {
   paralell.ncomp <- pa.sp$ncomp
   paralell.nfact <- pa.sp$nfact
   
-  
+ aicmin <-  tryCatch(expr={
   aic <- 1:14
   for (j in 1:14) {
     fa.sp <- fa(daten.sp, nfactors=j, max.iter=100, fm="ml", rotate="promax", method="pearson", n.obs=n)
     aic[j] <- (fa.sp$STATISTIC)-(2*(ncol(data)*(ncol(data)-1)/2-(ncol(data)*j+(j*(j-1)/2))))
   }
   aicmin <- which.min(aic)
+  }, error=function(cond) {
+    aicmin <-  paralell.ncomp
+  })
+  
   
 
   clusternumbers <- c(map, paralell.ncomp, paralell.nfact, aicmin )
@@ -150,6 +189,8 @@ if(type=="kmeans")   {
   whole.cluster.number <-  whole.cluster.number.faclust
 }  else if(type=="kmeanscor") {
   whole.cluster.number <-  whole.cluster.number.kmeanscor
+} else if(type=="kmeansmds") {
+  whole.cluster.number <- whole.cluster.number.kmeans
 }
 
   
@@ -169,7 +210,17 @@ result.names <- c("whole", "Var", "Bias")
     
     for(i in 1:length(vector)) {
       for(j in 1:length(vector[[1]])) {
-        m[j,i] <- vector[[i]][j] - whole.cluster.number[j]
+        whole.number <-  whole.cluster.number[j]
+        if(class(whole.number)=="list") {
+          whole.number <- unlist(whole.number)
+        }
+        
+        v <-  vector[[i]][j]
+        
+        if(class(v)=="list") {
+          v <- unlist(v)
+        }
+        m[j,i] <- v- whole.number
       }
     }
     
@@ -192,6 +243,9 @@ result.names <- c("whole", "Var", "Bias")
       method.bias <- mean(m[i,])
       method.whole <-  whole.cluster.number[i]
        
+      if(class(method.whole)=="list") {
+        method.whole <- unlist(method.whole)
+      }
       resultsmatrix[1,i] <- round(method.whole, digits=4)
       resultsmatrix[2,i] <- round(method.var, digits=4)
       resultsmatrix[3,i] <- round(method.bias, digits=4)
@@ -224,7 +278,7 @@ getClusterNumberBiasVariance.samples <- function(nrep, types, nobs) {
   globalsave <<- c()
 for(i in 1:(length(types))) {
   
-  
+  cat("i", i)
   type <- types[i]
 r1 <- drawNumberClusterAdvanced(facs,nrep=nrep, type=type, nobs=nobs)
  # globalsave[[i]] <<- r1

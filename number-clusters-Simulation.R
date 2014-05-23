@@ -56,7 +56,19 @@ drawNumberClusterAdvanced.simulation <- function(cor,nrep, type="kmeans",n) {
     
     for(i in 1:length(vector)) {
       for(j in 1:length(vector[[1]])) {
-        m[j,i] <- vector[[i]][j] - whole.cluster.number[j]
+        
+        v <- vector[[i]][j] 
+        
+        if(class(v)=="list") {
+          v <- unlist(v)[1]
+        }
+        whole.number <-  whole.cluster.number[j]
+        
+        if(class(whole.number) == "list") {
+          whole.number <- unlist(whole.number)
+        }
+        
+        m[j,i] <- v - whole.number
       }
     }
     
@@ -164,7 +176,7 @@ getClusterNumberBias.simulation.methods <- function(types, methods, fa.ges) {
   r.names <- c()
   descriptions <- ""
  
-  rs <- matrix(nrow=(length(types)-1)*length(method.names) + length(method.names.EFA), ncol=2+length(methods))
+  rs <- matrix(nrow=(length(types)-1)*length(method.names) + length(method.names.EFA), ncol=5)
   colnames(rs) <- c("clustermethod", "clusternumber" , "Sim1", "Sim2", "Sim3")
 
   colnames.rs <- c()
@@ -200,7 +212,7 @@ getClusterNumberBias.simulation.methods <- function(types, methods, fa.ges) {
   r <- drawNumberClusterAdvanced.simulation(cor,1,types[i], n=100)
 
   cat("r: ", r)
-  method.names.size <- length(method.names)
+  method.names.size <- 3
   
   if(types[i]=="faclust") {
     method.names.size <- length(method.names.EFA)
@@ -249,7 +261,7 @@ getClusterNumberBias.simulation.methods.samples <- function(types, methods, fa.g
   r.names <- c()
   descriptions <- ""
   
-  rs <- matrix(nrow=(length(types)-1)*length(method.names) + length(method.names.EFA), ncol=2+length(methods))
+  rs <- matrix(nrow=(length(types)-1)*length(method.names) + length(method.names.EFA), ncol=5)
   colnames(rs) <- c("clustermethod", "clusternumber" , "Sim1", "Sim2", "Sim3")
   
   colnames.rs <- c()
@@ -285,7 +297,7 @@ getClusterNumberBias.simulation.methods.samples <- function(types, methods, fa.g
       r <- drawNumberClusterAdvanced.simulation(cor,1,types[i], n=nobs)
       
       cat("r: ", r)
-      method.names.size <- length(method.names)
+      method.names.size <- 3
       
       if(types[i]=="faclust") {
         method.names.size <- length(method.names.EFA)

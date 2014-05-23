@@ -170,7 +170,7 @@ cmdsolve <- function(corM,k=5, dim=0) {
   if(dim == 0) {
     dim <- dim.max
   }
-  dcomp <- getDist(corM,F)
+ # dcomp <- getDist(corM,F)
   fit <- cmdscale(d,eig=TRUE, k=dim) # k is the number of dim
   fit # view results
   clustering <- kmeans(fit$points, centers=k,nstart=300)
@@ -180,16 +180,65 @@ cmdsolve <- function(corM,k=5, dim=0) {
   
   for(i in 1:k) {
     for(j in 1:dim(fit$points)[1]) {
-      distance <- sum((clustering$centers[i,] - fit$points[j,])^2)
+      distance <- sqrt(sum((clustering$centers[i,] - fit$points[j,])^2))
       distmatrix[i,j] <- distance
     }
   }
   
+  distpoints <- dist(fit$points, upper=T, diag=T)
+  corPoints <- as.matrix(1 - 2*distpoints^2)
+
+  centerCors <- as.matrix(1 - 2*distmatrix^2)
+  centerCors <- t(centerCors)
+  varimax(centerCors)
+  
+  rownames(centerCors) <-  rownames(fit$points)
   colnames(distmatrix) <- rownames(fit$points)
   distmatrix <- t(distmatrix)
   
   names(kmeans) <- rownames(corM)
   kmeans
+}
+
+
+cmdsolve.loading <- function(corM,k=5, dim=0) {
+  d <- getDist(corM,T)
+  
+  sign <- sign(as.matrix(d)*corM)
+  diag(sign) <- 1
+  dim.max <-  dim(corM)[1] - 1
+  if(dim == 0) {
+    dim <- dim.max
+  }
+  # dcomp <- getDist(corM,F)
+  fit <- cmdscale(d,eig=TRUE, k=dim) # k is the number of dim
+  fit # view results
+  clustering <- kmeans(fit$points, centers=k,nstart=300)
+  kmeans <- clustering$cluster
+  
+  distmatrix <- matrix(0, nrow=k,ncol=dim(fit$points)[1])
+  
+  for(i in 1:k) {
+    for(j in 1:dim(fit$points)[1]) {
+      distance <- sqrt(sum((clustering$centers[i,] - fit$points[j,])^2))
+      distmatrix[i,j] <- distance
+    }
+  }
+  
+  distpoints <- dist(fit$points, upper=T, diag=T)
+  corPoints <- as.matrix(1 - 2*distpoints^2)
+  
+  centerCors <- as.matrix(1 - 2*distmatrix^2)
+  centerCors <- t(centerCors)
+  varimax(centerCors)
+  
+  rownames(centerCors) <-  rownames(fit$points)
+  colnames(distmatrix) <- rownames(fit$points)
+  distmatrix <- t(distmatrix)
+  
+  names(kmeans) <- rownames(corM)
+  centerCors <- centerCors * sign
+  centerCors
 }
 
 
@@ -240,7 +289,17 @@ kMeansOnDistancesCor <- function(corM,k=5) {
 
 
 varClust <- function(cor.sp,k) {
+
+  clust2 <- kmeansvar(cor.sp, init = k, nstart=300)
+  clust2$cluster
+}
+
+
+
+varClust2 <- function(cor.sp,k) {
   tree <- hclustvar(cor.sp)
+  
   P3<-cutreevar(tree,k)
+  
   P3$cluster
 }

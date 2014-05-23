@@ -71,25 +71,29 @@ getClusterNumbers <- function(points, type="kmeans") {
 }
 
 
-EFA.Cluster.number <- function(daten.sp) {
+EFA.Cluster.number <- function(daten.sp,n) {
   
   data <- daten.sp
-  map.sp <- VSS(daten.sp, rotate = "promax", fm = "mle", title="Anzahl der Faktoren")
+  map.sp <- VSS(daten.sp, rotate = "promax", fm = "mle", title="Anzahl der Faktoren", n.obs=n)
   map <-    which.min(map.sp$map)
   
   
-  pa.sp <- fa.parallel(daten.sp, fm="ml",n.iter=100)
+  pa.sp <- fa.parallel(daten.sp, fm="ml",n.iter=100, n.obs=n)
   
   paralell.ncomp <- pa.sp$ncomp
   paralell.nfact <- pa.sp$nfact
   
-  
-  aic <- 1:14
-  for (j in 1:14) {
-    fa.sp <- fa(daten.sp, nfactors=j, max.iter=100, fm="ml", rotate="promax", method="pearson")
-    aic[j] <- (fa.sp$STATISTIC)-(2*(ncol(data)*(ncol(data)-1)/2-(ncol(data)*j+(j*(j-1)/2))))
-  }
-  aicmin <- which.min(aic)
+  result = tryCatch({
+    aic <- 1:14
+    for (j in 1:14) {
+      fa.sp <- fa(daten.sp, nfactors=j, max.iter=100, fm="ml", rotate="promax", method="pearson", n.obs=n)
+      aic[j] <- (fa.sp$STATISTIC)-(2*(ncol(data)*(ncol(data)-1)/2-(ncol(data)*j+(j*(j-1)/2))))
+    }
+    aicmin <- which.min(aic)
+},  error = function(e) {
+  aicmin <- paralell.ncomp
+})
+ 
   
   
   clusternumber.EFA.methods <<- c("MAP", "Paralell-mcomp", "Paralell-nfact", "AIC")

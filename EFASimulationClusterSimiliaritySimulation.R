@@ -325,7 +325,7 @@ getClusterSimiliarity.simulation.samples.methods <- function(methods, zuordnung.
       loads <- NL.two(fa.ges$loadings)
     }
     
-    corM <- sim.structure(fx=loads,Phi=Phi, uniq=fa.ges$uniquenesses, n=nobs, raw=T)$r
+    corM <- sim.structure(fx=loads,Phi=Phi, uniq=fa.ges$uniquenesses, n=nobs, raw=F, items=T, cat=5)$r
  
     
     rs[i,] <- getResults(corM, toSimulate,zuordnung.ges, comparing=1)

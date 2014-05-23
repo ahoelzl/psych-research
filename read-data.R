@@ -191,3 +191,5 @@ corcor <- cor(cor, use="pairwise.complete.obs", method="pearson")
 
 
 corM <- cor
+
+fa.ges.no.rotation <- fa(corM, nfactors=5, rotate="none")

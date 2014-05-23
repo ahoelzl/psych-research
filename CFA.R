@@ -58,7 +58,22 @@ getClustering <- function(cor.sp, k, method, daten.sp=NULL) {
     cut.sp1 <- fclustering(cor.sp,k)
   } else if(method=="clustofvar") {
     cut.sp1 <- varClust(daten.sp,k)
+  } else if(method=="clustofvar2") {
+    cut.sp1 <- varClust2(daten.sp,k)
   }
+  cut.sp1
+}
+
+
+getLoadingMatrix <- function(cor.sp, k, method, daten.sp=NULL) {
+  cut.sp1 <- c()
+ 
+    if(method=="kmeansmds") {
+    cut.sp1 <- cmdsolve.loading(cor.sp,k)
+    } else if(method=="faclust" || method=="efa") {
+    cut.sp1 <- fclustering.loading(cor.sp,k)
+    }
+  
   cut.sp1
 }
 
@@ -66,7 +81,7 @@ getClustering <- function(cor.sp, k, method, daten.sp=NULL) {
 
 getCFASimiliarity <- function(facs, nobs,methods, daten.sp1, daten.sp2,  efa=F) {
   
-  results <- matrix(0,nrow=length(method.names.normal)+4, ncol=6)
+  results <- matrix(0,nrow=length(method.names.normal)+4, ncol=7)
   #  daten.sp1 <- facs[sample(x=1:nrow(facs), size=nobs, replace=T),]
   cor.sp1 <- cor(as.matrix(daten.sp1), use="pairwise.complete.obs", method="pearson")
   
@@ -77,12 +92,11 @@ getCFASimiliarity <- function(facs, nobs,methods, daten.sp1, daten.sp2,  efa=F) 
   method.names.normal <- c("Connectivity", "Dunn" ,"Silhouette")
   
   measures <- c()
-
-  
+    
     
   #  daten.sp2 <- facs[sample(x=1:nrow(facs), size=nobs, replace=T),]
     cor.sp2 <- cor(as.matrix(daten.sp2), use="pairwise.complete.obs", method="pearson")
-
+    
     
     if(method=="faclust" || method=="efa") {
       number.clusters <-  efa.cluster.number
@@ -101,12 +115,19 @@ measures <- c()
     #names(number.cluster) <- method.names
       cat("------------------------------", method, " ----------- ", names(number.clusters)[u], "\n")  
 
+      
+      
     k <- number.cluster
     
-    if(k == 0) {
-      k <- 1
-    }
+   
     
+      if(class(k)=="list") {
+        k <- unlist(k)[1]
+      }
+      
+      if(k == 0) {
+        k <- 1
+      }
     cat("k :", k)
     clustering <- getClustering(cor.sp1, k, method, daten.sp=daten.sp1)
     cat("clustering :", clustering)
@@ -130,10 +151,18 @@ measures <- c()
       }
     }
     
+      print(latent.zuweisung)
     
-    frame <- as.data.frame(cor.sp2)
+    frame <- as.data.frame(daten.sp2)
     
-    fit <- cfa(latent.zuweisung,data = frame, control=list(rel.tol =  1e-5))
+    fit <- cfa(latent.zuweisung,data = frame, control=list(
+      eval.max = 20000L, 
+      iter.max = 10000L, 
+      trace = 0L, 
+      abs.tol = (.Machine$double.eps * 10) ,
+      rel.tol = 1e-5, # 1e-10 seems 'too strict' 
+      x.tol = 1.5e-8 ,
+      step.min = 2.2e-14 ))
   
     cat("beforelogLk")
     
@@ -144,6 +173,7 @@ measures <- c()
       
       results <- matrix(0,nrow=length(method.names.normal)+4, ncol=5)
       return(results)
+     # meas <- 0
     } else {
       cat("before meas")
     meas <- fitMeasures(fit, c("BIC"))
@@ -168,7 +198,133 @@ results[w+u,h] <- meas
   
 }
 
-runCFR <- function(nrep, nobs, methods = c("efa", "averagecor","completecor", "kmeansmds", "kmeanscor", "clustofvar")) {
+
+
+
+getCFASimiliarity.loading <- function(facs, nobs,methods, daten.sp1, daten.sp2,  efa=F) {
+  
+  results <- matrix(0,nrow=length(method.names.normal)+4, ncol=7)
+  #  daten.sp1 <- facs[sample(x=1:nrow(facs), size=nobs, replace=T),]
+  cor.sp1 <- cor(as.matrix(daten.sp1), use="pairwise.complete.obs", method="pearson")
+  
+  efa.cluster.number <-  EFA.Cluster.number(cor.sp1, n=nobs)
+  for(h  in 1:length(methods)) {
+    method <- methods[h]
+    
+    method.names.normal <- c("Connectivity", "Dunn" ,"Silhouette")
+    
+    measures <- c()
+    
+    
+    
+    #  daten.sp2 <- facs[sample(x=1:nrow(facs), size=nobs, replace=T),]
+    cor.sp2 <- cor(as.matrix(daten.sp2), use="pairwise.complete.obs", method="pearson")
+    
+    
+    if(method=="faclust" || method=="efa") {
+      number.clusters <-  efa.cluster.number
+      names(number.clusters) <- method.names.EFA
+    } else {
+      number.clusters <- numcluadvanced.whole(daten.sp1, type=method, n=nobs)
+      number.clusters <- append(number.clusters,  efa.cluster.number)
+      names(number.clusters) <- c(method.names.normal, method.names.EFA)
+    }
+    
+    measures <- c()
+    
+    for(u in 1:length(number.clusters)) {
+      
+      number.cluster <- number.clusters[u]
+      
+#names(number.cluster) <- method.names
+      cat("------------------------------", method, " ----------- ", names(number.clusters)[u], "\n")  
+      
+      k <- number.cluster
+      
+      if(k == 0) {
+        k <- 1
+      }
+      
+      cat("k :", k)
+      clustering <- getClustering(cor.sp1, k, method, daten.sp=daten.sp1)
+      
+      loads <- getLoadingMatrix(cor.sp1, k, method, daten.sp=daten.sp1)
+      
+      setzero <- function(x) {
+        bins <- x == max(x)
+        x[!bins] <- 0
+        x
+      }
+      
+      loads <- t(apply(loads, 1, setzero))
+      
+      cat("clustering :", clustering)
+      latent.zuweisung <- ''
+      
+      for(i in 1:k) {
+        clustername = as.character(paste0("class",i))
+        cluster.name <- names(which(clustering==i))
+        loadings <- loads
+        if(length(cluster.name) > 0) {
+          latent.zuweisung <- paste(latent.zuweisung, clustername, " =~ " )
+          
+          for(r in 1:length(cluster.name)) {
+            name <- cluster.name[r]
+            load <- sum(loadings[rownames(loadings)==name,])
+            latent.zuweisung <- paste(latent.zuweisung,load," * ", name, "+ ")
+          }
+          
+          #removes the , at the end
+          
+          latent.zuweisung <- substring(latent.zuweisung, 1, nchar(latent.zuweisung) - 2)
+          
+          latent.zuweisung <- paste(latent.zuweisung,  " ",  sep='\n')
+        }
+      }
+      
+      
+      frame <- as.data.frame(cor.sp2)
+      
+      fit <- cfa(latent.zuweisung,data = frame, control=list(rel.tol =  1e-5))
+      
+      cat("beforelogLk")
+      
+      test <-  try(logLik(fit))
+      
+      if(  class(test) == "try-error")  {
+        
+        
+        results <- matrix(0,nrow=length(method.names.normal)+4, ncol=5)
+        return(results)
+      } else {
+        cat("before meas")
+        meas <- fitMeasures(fit, c("BIC"))
+        cat("meas: ", meas)
+        
+        cat(latent.zuweisung, "\n")
+        cat(" Fit: ", meas,  "\n")
+        cat("------------", "\n")
+      }
+      
+      w <- 0
+      if(method == "efa") {
+        w <- 3
+      }
+      results[w+u,h] <- meas
+      
+    }
+  }
+  
+  results
+  
+  
+}
+
+
+
+
+
+runCFR <- function(nrep, nobs, methods = c("efa", "averagecor","completecor", "kmeansmds", "kmeanscor", "clustofvar", "clustofvar2")) {
 
 
 
@@ -188,7 +344,7 @@ for(i in 1:nrep) {
 
 resultlist <- list()
 
-s <- matrix(0,nrow=length(method.names.normal)+4, ncol=6)
+s <- matrix(0,nrow=length(method.names.normal)+4, ncol=7)
 for(z in 1:nrep) {
     daten.sp1 <- facs[samples[[z]],]
   #  daten.sp2 <- facs[sample(x=1:nrow(facs), size=nobs, replace=T),]
@@ -210,18 +366,82 @@ for(z in 1:nrep) {
       next;
     }
     
-    s <- s + save.value
+    s <- s + save.value/nrep
+    
+    print(s)
    # resultlist[[z]] <- save.value
     
 }
 
-s <- s/nrep
+s <- s
 
+avgsum <- sum(s)/(49-3) 
+
+s <- s - avgsum
+s[c(1,2,3),1] <- 0
 
 
 paintTable(s, "Varianz des BIC bei konfirmatorischer CFA", paste0("nrep ", nrep))
 #results.m <- t(as.matrix(results, 1)
 paintTable(s, "BIC bei konfirmatorischer CFA", paste0("nrep ", nrep, " nobs ", nobs))
+}
+
+
+
+runCFR.loading <- function(nrep, nobs, methods = c("efa","kmeansmds")) {
+  
+  
+  
+  results <- c()
+  
+  results.matrix <- matrix(0, ncol=length(methods), nrow=length(method.names.normal)+4)
+ # colnames(results.matrix) <- methods
+  
+  results.matrix.var <- matrix(0, ncol=length(methods), nrow=length(method.names.normal)+4)
+ # colnames(results.matrix.var) <- methods
+  ####simulate the data
+  
+  samples <- list()
+  for(i in 1:nrep) {
+    samples[[i]] <- sample(x=1:nrow(facs), size=nobs, replace=T)
+  }
+  
+  resultlist <- list()
+  
+  s <- matrix(0,nrow=length(method.names.normal)+4, ncol=7)
+  for(z in 1:nrep) {
+    daten.sp1 <- facs[samples[[z]],]
+    #  daten.sp2 <- facs[sample(x=1:nrow(facs), size=nobs, replace=T),]
+    
+    ##das zweite keine Stichprobe sondern alle Daten
+    
+    daten.sp2 <- facs
+    
+    save.value <-  getCFASimiliarity.loading(facs, nobs=nobs, methods=methods, efa=efa, daten.sp1 = daten.sp1,
+                                     daten.sp2 = daten.sp2)
+    
+    
+    save.value
+    rownames(save.value) <- c(method.names.normal, method.names.EFA)
+  #  colnames(save.value) <- methods
+    
+    if(save.value[2,2]==0) {
+      z <- z - 1
+      next;
+    }
+    
+    s <- s + save.value
+    # resultlist[[z]] <- save.value
+    
+  }
+  
+  s <- s/nrep
+  
+  
+  
+  paintTable(s, "Varianz des BIC bei konfirmatorischer CFA - loadings", paste0("nrep ", nrep))
+  #results.m <- t(as.matrix(results, 1)
+  paintTable(s, "BIC bei konfirmatorischer CFA - loadings", paste0("nrep ", nrep, " nobs ", nobs))
 }
 
 
@@ -309,8 +529,6 @@ output.cor.matrices <- function(nrep = 100, size=c(100,200,500,1000)) {
   hist(changed, main=paste0("size:", s))
   
 }
-  
-  
 }
 
 

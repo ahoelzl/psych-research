@@ -1,8 +1,5 @@
 library(ClustOfVar)
 source("Daten_einlesen.R")
-
-#dann wird der IST Datensatz verwendet
-#source("data_analysis.R")
 source("GesamtDatenAnalysen.R")
 
 source("number-clusters-Samples.R")
@@ -14,13 +11,12 @@ source("CFA.R")
 library(psych)
 library(gridExtra)
 library(ClustOfVar)
-
 addError <- F
 
 paintTable <- function(table, title,footnote) {
-
+  
   title <- gsub(" ", "", title)
-  filename <- paste0("currentresults/",title,".jpeg")
+  filename <- paste0("currentresults3/",title,".jpeg")
   print(filename)
   jpeg(filename, width=1000, height=1000)
   
@@ -29,7 +25,7 @@ paintTable <- function(table, title,footnote) {
   for(i in 1:dim(table)[1]) {
     for(j in 1:dim(table)[2]) {
       if(is.numeric(table[i,j])) {
-      table[i,j] <- round(table[i,j], 2)
+        table[i,j] <- round(table[i,j], 2)
       }
     }
   }
@@ -40,16 +36,16 @@ paintTable <- function(table, title,footnote) {
   h <- grobHeight(table)
   w <- grobWidth(table)
   title2 <- textGrob(title, y=unit(0.5,"npc") + 0.5*h, 
-                    vjust=0, gp=gpar(fontsize=20))
+                     vjust=0, gp=gpar(fontsize=20))
   footnote <- textGrob(footnote, 
                        x=unit(0.5,"npc") - 0.5*w,
                        y=unit(0.5,"npc") - 0.5*h, 
                        vjust=1, hjust=0,gp=gpar( fontface="italic"))
   gt <- gTree(children=gList(table, title2, footnote))
- 
-
- 
-
+  
+  
+  
+  
   grid.draw(gt)
   dev.off()
   
@@ -58,7 +54,7 @@ paintTable <- function(table, title,footnote) {
 
 
 
-toSimulate <<- c("faclust", "averagecor", "completecor", "kmeansmds", "kmeanscor", "clustofvar", "clustofvar2")
+toSimulate <- c("faclust", "averagecor", "completecor", "kmeansmds", "kmeanscor", "clustofvar", "clustofvar2")
 toSimulateOld <- c("faclust", "averagecor", "completecor", "kmeansmds", "kmeanscor")
 method.names.EFA <<- c("MAP", "Paralell-mcomp", "Paralell-nfact", "AIC")
 method.names.normal <<- c("Connectivity", "Dunn" ,"Silhouette")
@@ -71,9 +67,6 @@ nrep <- 100
 nobs <- 100
 numbercluster <- 5
 
-
-#runCFR.loading(nrep=nrep, nobs=nobs)
-
 runCFR(nrep=nrep, nobs=nobs)
 
 test1 <- getClusterSimiliarity.simulation.methods(methods=c(1,2,3),zuordnung.ges, toSimulateOld, fa.ges) 
@@ -82,14 +75,20 @@ test2 <- getClusterSimiliarity.simulation.samples.methods(methods=c(1,2,3), zuor
 getClusterSimiliarity.samples(nrep=nrep,numbercluster=numbercluster)
 
 
-res <- getClusterNumberBiasVariance.samples(nrep=nrep, types= c("kmeans", "average", "complete","kmeanscor", "faclust"), nobs=nobs)
+res <- getClusterNumberBiasVariance.samples(nrep=nrep, types= c("kmeans", "average", "complete","kmeanscor","faclust"), nobs=nobs)
 
 res <- getClusterNumberBias.simulation.methods(types= c("kmeans", "average", "complete", "kmeanscor","faclust"), 
-                                       methods=c(1,2,3), fa.ges)
+                                               methods=c(1,2,3), fa.ges)
 
 
 r1 <- getClusterNumberBias.simulation.methods.samples(types= c("kmeans", "average", "complete","kmeanscor", "faclust"),
                                                       methods=c(1,2,3), fa.ges,  nobs=nobs, nrep=nrep)
+
+
+
+
+
+
 
 
 

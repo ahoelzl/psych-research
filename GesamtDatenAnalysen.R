@@ -20,9 +20,9 @@
 
 getDist <- function(corM, asdist) {
   if(asdist) {
-  as.dist(sqrt(0.5-0.5*corM), upper=T, diag=T)
+  as.dist(sqrt(0.5-0.5*abs(corM)), upper=T, diag=T)
   } else {
-    sqrt(0.5-0.5*corM)
+    sqrt(0.5-0.5*abs(corM))
   }
 }
 
@@ -187,6 +187,15 @@ fclustering <- function(corM,k=5,show=F) {
   zuordnung.ges6 <- apply(fa.ges6$loadings,1,function(x) which.max(abs(x)))
   zuordnung.ges6
 }
+
+
+fclustering.loading <- function(corM,k=5,show=F) {
+  fa.ges6 <- fa(corM, nfactors=k, max.iter=100, fm="ml", rotate="promax", method="pearson")
+  zuordnung.ges6 <- apply(fa.ges6$loadings,1,function(x) which.max(abs(x)))
+  fa.ges6$loadings
+}
+
+
 ##Faktoranalyse
 #fa.ges <- fa(facs, nfactors=numberclusterfactor, max.iter=100, fm="ml", rotate="promax", method="pearson")
 #fa.ges6 <- fa(facs, nfactors=6, max.iter=100, fm="ml", rotate="promax", method="pearson")
