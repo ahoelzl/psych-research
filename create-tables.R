@@ -82,9 +82,11 @@ test2 <- getClusterSimiliarity.simulation.samples.methods(methods=c(1,2,3), zuor
 getClusterSimiliarity.samples(nrep=nrep,numbercluster=numbercluster)
 
 
-res <- getClusterNumberBiasVariance.samples(nrep=nrep, types= c("kmeans", "average", "complete","kmeanscor", "faclust"), nobs=nobs)
+res <- getClusterNumberBiasVariance.samples(nrep=nrep, types= 
+                                              c("kmeans", "average", "complete", "kmeanscor",
+                                                "varclust", "varclust2","faclust",), nobs=nobs)
 
-res <- getClusterNumberBias.simulation.methods(types= c("kmeans", "average", "complete", "kmeanscor","faclust"), 
+res <- getClusterNumberBias.simulation.methods(types= c("kmeans", "average", "complete", "kmeanscor", "varclust", "varclust2", "faclust"), 
                                        methods=c(1,2,3), fa.ges)
 
 

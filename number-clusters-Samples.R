@@ -118,7 +118,49 @@ getClusterNumbers <- function(points,cor.sp, type="kmeans", numbermethod="intern
       result[1] <- 2
     }
     names(result) <- result.names
-  } else if(type=="faclust") {
+  } else if(type=="varclust") {
+    
+    dist.m <- dist(points, method="euclidean")
+    dunns <- c()
+    conns<- c()
+    sills <- c()
+    for(t in 2:(minv-1)) {
+      cluster <- varClust(points, k=t)
+      dist.m = dist(t(points), method="euclidean")
+      names(cluster) <- rownames(as.matrix(dist.m))
+      conns <- append(conns,connectivity(dist.m, cluster))
+      dunns <- append(dunns,dunn(dist.m, cluster))
+      sil <- silhouette(cluster, dist.m)
+      sills <- append(sills,  summary(sil)$avg.width)
+    }
+    
+    con <- which.min(conns)+1
+    if(length(con)==0) {
+      con <- 2
+    }
+    result <- c(con, which.max(dunns)+1,which.max(sills)+1)
+    
+    } else if(type=="varclust2"){
+      dist.m <- dist(points, method="euclidean")
+      dunns <- c()
+      conns<- c()
+      sills <- c()
+      for(t in 2:(minv-1)) {
+        cluster <- varClust2(points, k=t)
+        dist.m = dist(t(points), method="euclidean")
+        names(cluster) <- rownames(as.matrix(dist.m))
+        conns <- append(conns,connectivity(dist.m, cluster))
+        dunns <- append(dunns,dunn(dist.m, cluster))
+        sil <- silhouette(cluster, dist.m)
+        sills <- append(sills,  summary(sil)$avg.width)
+      }
+      
+      con <- which.min(conns)+1
+      if(length(con)==0) {
+        con <- 2
+      }
+      result <- c(con, which.max(dunns)+1,which.max(sills)+1)
+    }  else if(type=="faclust") {
     result <- EFA.Cluster.number(cor.sp = cor.sp, n=n)
     ##(type=="kmeanscor")
   } else  {
@@ -152,7 +194,7 @@ EFA.Cluster.number <- function(cor.sp, n) {
   
   
   pa.sp <- fa.parallel(daten.sp, fm="ml",n.iter=100, n.obs=n)
-  
+
   paralell.ncomp <- pa.sp$ncomp
   paralell.nfact <- pa.sp$nfact
   
@@ -191,6 +233,10 @@ if(type=="kmeans")   {
   whole.cluster.number <-  whole.cluster.number.kmeanscor
 } else if(type=="kmeansmds") {
   whole.cluster.number <- whole.cluster.number.kmeans
+} else if(type=="varclust"){
+  whole.cluster.number <- whole.cluster.number.varclust
+} else if(type=="varclust2"){
+  whole.cluster.number <- whole.cluster.number.varclust2
 }
 
   
@@ -267,12 +313,14 @@ whole.cluster.number.average <- numcluadvanced.whole(facs, type="average")
 whole.cluster.number.complete <- numcluadvanced.whole(facs, type="complete")
 whole.cluster.number.faclust <- numcluadvanced.whole(facs, type="faclust", n=dim(facs)[1])
 whole.cluster.number.kmeanscor <- numcluadvanced.whole(facs, type="kmeanscor")
+whole.cluster.number.varclust <- numcluadvanced.whole(facs, type="varclust")
+whole.cluster.number.varclust2 <- numcluadvanced.whole(facs, type="varclust2")
 #}
 
 
 getClusterNumberBiasVariance.samples <- function(nrep, types, nobs) {
   
-  rs <- matrix(nrow = 5, ncol= (length(types) - 1) * length(method.names) + length( method.names.EFA)  )
+  rs <- matrix(nrow = 5, ncol= (length(types) - 1) * length(method.names) + length( method.names.EFA) + 20 )
   rs[1, ] <- ""
   
   globalsave <<- c()
@@ -299,10 +347,23 @@ rs[1, (i-1) * length(method.names) + 1] <- types[i]
   
   rownames(rs) <- c("clustertype", "clusternumber", "whole", "Var", "Bias")
   
-  paintTable(t(rs), "Clusteranzahlsgenauigkeit bei Samples", paste0("type ",type, " nobs ", nobs))
   
+  names <-  rs[2,] %in% c("APN","AD","ADM","FOM",NA) 
+  numbers <-  rs[5,] %in% c(NA) 
   
-rs
+  clustertype <- rep(types,each=3)
+  clustertype <- c(clustertype,"faclust")
+  
+  clusternumber <- rs[2,][!names]
+  whole <- rs[3,][!numbers]
+  var <- rs[4,][!numbers]
+  bias <- rs[5,][!numbers]
+  
+  result <- cbind(clustertype, clusternumber, whole,var,bias)
+  
+result
+  
+  paintTable(result, "Clusteranzahlsgenauigkeit bei Samples", paste0("type ",type, " nobs ", nobs))
 }
 
 #r1 <- getClusterNumberBiasVariance.samples(50,"kmeans")

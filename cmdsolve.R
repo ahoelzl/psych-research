@@ -290,7 +290,7 @@ kMeansOnDistancesCor <- function(corM,k=5) {
 
 varClust <- function(cor.sp,k) {
 
-  clust2 <- kmeansvar(cor.sp, init = k, nstart=300)
+  clust2 <- kmeansvar(cor.sp, init = k, nstart=100)
   clust2$cluster
 }
 

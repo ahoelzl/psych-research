@@ -176,7 +176,7 @@ getClusterNumberBias.simulation.methods <- function(types, methods, fa.ges) {
   r.names <- c()
   descriptions <- ""
  
-  rs <- matrix(nrow=(length(types)-1)*length(method.names) + length(method.names.EFA), ncol=5)
+  rs <- matrix(nrow=(length(types)-1)*length(method.names) + length(method.names.EFA)+100, ncol=5)
   colnames(rs) <- c("clustermethod", "clusternumber" , "Sim1", "Sim2", "Sim3")
 
   colnames.rs <- c()
@@ -236,8 +236,27 @@ getClusterNumberBias.simulation.methods <- function(types, methods, fa.ges) {
 
  # }
   }
-  rownames(rs) <- colnames.rs
-  paintTable(rs, "Clusteranzahlsabweichung bei EFA-Similation mit 5 Faktoren", 
+  
+  rs <- t(rs)
+  names <-  rs[2,] %in% c("APN","AD","ADM","FOM",NA) 
+  numbers <-  rs[5,] %in% c(NA) 
+  
+  clustertype <- rep(types,each=3)
+  clustertype <- c(clustertype,"faclust")
+  
+  clusternumber <- rs[2,][!names]
+  clusternumber <- rep(c("Connectivity","Dunn","Silhouette"),6)
+  clusternumber <- c(clusternumber, "MAP", "Parallel-ncomp", "Parallel-nfact", "AIC")
+  Sim1 <- rs[3,][!numbers]
+  Sim2 <- rs[4,][!numbers]
+  Sim3 <- rs[5,][!numbers]
+  
+  result <- cbind(clustertype, clusternumber, Sim1,Sim2,Sim3)
+  
+  result
+  
+  
+  paintTable(result, "Clusteranzahlsabweichung bei EFA-Similation mit 5 Faktoren", 
              paste0(" \n ", descriptions)) 
 }
 
