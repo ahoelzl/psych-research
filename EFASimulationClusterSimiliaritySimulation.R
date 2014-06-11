@@ -69,107 +69,107 @@ getResults <- function(corM, toSimulate, zuordnung.ges, comparing) {
   for(sim in toSimulate) {
     print(sim)
     if(sim=="averagecor") {
-      averagecor <- averageCor(corM)
+      averagecor <- averageCor(corM, k= max(zuordnung.ges))
       
       averagecorresult <- averagecorresult  + sum(vergleich(zuordnung.ges,averagecor, comparing))
       results <-append(results,averagecorresult/nrep)
     } else if(sim=="averagecorcor") {
       
-      averagecorcor <- averageCorCor(corM)
+      averagecorcor <- averageCorCor(corM,  k = max(zuordnung.ges))
       averagecorcorresult <- averagecorcorresult  + sum(vergleich(zuordnung.ges,averagecorcor, comparing))
       
       results <-append(results,averagecorcorresult/nrep)
     } else if(sim=="completecor") {
       
-      completecor <- completeCor(corM)
+      completecor <- completeCor(corM, k = max(zuordnung.ges))
       completecorresult <- completecorresult  + sum(vergleich(zuordnung.ges,completecor, comparing))
       results <-append(results,completecorresult/nrep)
     } else if(sim=="completecorcor") {
       
-      completecorcor <- completeCorCor(corM)
+      completecorcor <- completeCorCor(corM, k = max(zuordnung.ges))
       completecorcorresult <- completecorcorresult  + sum(vergleich(zuordnung.ges,completecorcor, comparing))
       results <-append(results,completecorcorresult/nrep)
     }  else if(sim=="kmeansmds") {   
-      kmeans <- cmdsolve(corM)
+      kmeans <- cmdsolve(corM, k = max(zuordnung.ges))
       kmeansresult <- kmeansresult  + sum(vergleich(zuordnung.ges,kmeans, comparing))
       results <-append(results,kmeansresult/nrep)
     } else if(sim=="Dim1") {   
-      kmeans <- cmdsolve(corM,dim=1)
+      kmeans <- cmdsolve(corM,dim=1, k = max(zuordnung.ges))
       kmeansresult1 <- kmeansresult  + sum(vergleich(zuordnung.ges,kmeans, comparing))
       results <-append(results,kmeansresult1/nrep)
     }  else if(sim=="Dim2") {   
-      kmeans <- cmdsolve(corM,dim=2)
+      kmeans <- cmdsolve(corM,dim=2, k = max(zuordnung.ges))
       kmeansresult2 <- kmeansresult  + sum(vergleich(zuordnung.ges,kmeans, comparing))
       results <-append(results,kmeansresult2/nrep)
     }  else if(sim=="Dim3") {   
-      kmeans <- cmdsolve(corM,dim=3)
+      kmeans <- cmdsolve(corM,dim=3, k = max(zuordnung.ges))
       kmeansresult3 <- kmeansresult  + sum(vergleich(zuordnung.ges,kmeans, comparing))
       results <-append(results,kmeansresult3/nrep)
     }  else if(sim=="Dim4") {   
-      kmeans <- cmdsolve(corM,dim=4)
+      kmeans <- cmdsolve(corM,dim=4, k = max(zuordnung.ges))
       kmeansresult4 <- kmeansresult  + sum(vergleich(zuordnung.ges,kmeans, comparing))
       results <-append(results,kmeansresult4/nrep)
     } else if(sim=="Dim10") {   
-      kmeans <- cmdsolve(corM,dim=10)
+      kmeans <- cmdsolve(corM,dim=10, k = max(zuordnung.ges))
       kmeansresult10 <- kmeansresult  + sum(vergleich(zuordnung.ges,kmeans, comparing))
       results <-append(results,kmeansresult10/nrep)
     } else if(sim=="Dim20") {   
-      kmeans <- cmdsolve(corM,dim=20)
+      kmeans <- cmdsolve(corM,dim=20, k = max(zuordnung.ges))
       kmeansresult20 <- kmeansresult  + sum(vergleich(zuordnung.ges,kmeans, comparing))
       results <-append(results,kmeansresult20/nrep)
     } else if(sim=="Dim30") {   
-      kmeans <- cmdsolve(corM,dim=30)
+      kmeans <- cmdsolve(corM,dim=30, k = max(zuordnung.ges))
       kmeansresult30 <- kmeansresult  + sum(vergleich(zuordnung.ges,kmeans, comparing))
       results <-append(results,kmeansresult30/nrep)
     }  else if(sim=="kmeanskoord") {
-      kmeansNew <- kMeansOnDistances(corM)
+      kmeansNew <- kMeansOnDistances(corM, k = max(zuordnung.ges))
       kmeansNewResult <- kmeansNewResult  + sum(vergleich(zuordnung.ges,kmeansNew, comparing))
       results <-append(results,kmeansNewResult/nrep)
     }  else if(sim=="kmeanscor") {
-      kmeansCor <- kmeansCor(corM)
+      kmeansCor <- kmeansCor(corM, k = max(zuordnung.ges))
       kmeansCorResult <- kmeansCorResult  + sum(vergleich(zuordnung.ges,kmeansCor, comparing))
       results <-append(results,kmeansCorResult/nrep)
     } else if(sim=="completecorcorcor") {
-      completeCorCorCor <- completeCorCorCor(corM)
+      completeCorCorCor <- completeCorCorCor(corM, k = max(zuordnung.ges))
       completeCorCorCorResult <- completeCorCorCorResult  + sum(vergleich(zuordnung.ges,completeCorCorCor, comparing))
       results <-append(results,completeCorCorCorResult/nrep)
     } else if(sim=="averagecorcorcor") {
-      averageCorCorCor <- averageCorCorCor(corM)
+      averageCorCorCor <- averageCorCorCor(corM, k = max(zuordnung.ges))
       averageCorCorCorResult <- averageCorCorCorResult  + sum(vergleich(zuordnung.ges,averageCorCorCor, comparing))
       results <-append(results,averageCorCorCorResult/nrep)
     } else if(sim=="kmeanscorcor") {
       print("kmeanscorcor")
-      kmeanscorcor<- kmeansCorCor(corM)
+      kmeanscorcor<- kmeansCorCor(corM, k = max(zuordnung.ges))
       print(kmeanscorcor)
       kmeanscorcorResult <- kmeanscorcorResult  + sum(vergleich(zuordnung.ges,kmeanscorcor, comparing))
       print(print(kmeanscorcorResult))
       results <-append(results,kmeanscorcorResult/nrep)
     } else if(sim=="kmeansmdscor") {
-      cmdsolveCor <- cmdsolveCor(corM)
+      cmdsolveCor <- cmdsolveCor(corM, k = max(zuordnung.ges))
       cmdsolveCorResult <-  cmdsolveCorResult   + sum(vergleich(zuordnung.ges, cmdsolveCor, comparing))
       results <-append(results,cmdsolveCorResult/nrep)
     }  else if(sim=="kMeansondistancescor ") {
-      kMeansOnDistancesCor  <- kMeansOnDistancesCor(corM)
+      kMeansOnDistancesCor  <- kMeansOnDistancesCor(corM, k = max(zuordnung.ges))
       kMeansOnDistancesCorResult <-  kMeansOnDistancesCorResult   + sum(vergleich(zuordnung.ges,kMeansOnDistancesCor, comparing))
       results <-append(results,kMeansOnDistancesCorResult/nrep)
     }  else if(sim=="averagecornom") {
-      averagecor <- averageCorNoMetric(corM)
+      averagecor <- averageCorNoMetric(corM, k = max(zuordnung.ges))
       averagecornometricresult <- averagecornometricresult  + sum(vergleich(zuordnung.ges,averagecor, comparing))
       results <-append(results,averagecornometricresult/nrep)
     } else if(sim=="averageccnom") {
-      averagecorcor <- averageCorCorNoMetric(corM)
+      averagecorcor <- averageCorCorNoMetric(corM, k = max(zuordnung.ges))
       averagecorcornometricresult <- averagecorcornometricresult + sum(vergleich(zuordnung.ges,averagecorcor, comparing))
       results <-append(results,averagecorcornometricresult/nrep)
     } else if(sim=="completecornom") {
-      completecor <- completeCorNoMetric(corM)
+      completecor <- completeCorNoMetric(corM, k = max(zuordnung.ges))
       completecornometricresult <- completecornometricresult  + sum(vergleich(zuordnung.ges,completecor, comparing))
       results <-append(results,completecornometricresult/nrep)
     } else if(sim=="completeccnom") {
-      completecorcor <- completeCorCorNoMetric(corM)
+      completecorcor <- completeCorCorNoMetric(corM, k = max(zuordnung.ges))
       completecorcornometricresult <- completecorcornometricresult  + sum(vergleich(zuordnung.ges,completecorcor, comparing))
       results <-append(results,completecorcornometricresult /nrep)
     }  else if(sim=="faclust") {
-      completecorcor <- fclustering(corM)
+      completecorcor <- fclustering(corM, k = max(zuordnung.ges))
       completecorcornometricresult <- completecorcornometricresult  + sum(vergleich(zuordnung.ges,completecorcor, comparing))
       results <-append(results,completecorcornometricresult /nrep)
     } 
@@ -309,7 +309,7 @@ getClusterSimiliarity.simulation.samples.methods <- function(methods, zuordnung.
     }
     
     
-    colnames(rs) <- toSimulate
+    colnames(rs) <- c(toSimulate)
     #for(i in 1:length(NL.mus))  {
     #r1 <- compareClusterings(NL.mus[i],0,Kor.mus[i],0,1,toSimulates, addError=addError)
     
@@ -326,9 +326,21 @@ getClusterSimiliarity.simulation.samples.methods <- function(methods, zuordnung.
     }
     
     corM <- sim.structure(fx=loads,Phi=Phi, uniq=fa.ges$uniquenesses, n=nobs, raw=F, items=T, cat=5)$r
- 
+    data <-  sim.structure(fx=loads,Phi=Phi, uniq=fa.ges$uniquenesses, n=nobs, raw=T, items=T, cat=5)$observed
     
-    rs[i,] <- getResults(corM, toSimulate,zuordnung.ges, comparing=1)
+    
+   varClustering <-  varClust(data, k=max(zuordnung.ges))
+    varClustResult <- sum(vergleich(zuordnung.ges,varClustering, compareMethod=1))
+    
+    varClustering2 <-  varClust2(data, k=max(zuordnung.ges))
+    varClustResult2 <- sum(vergleich(zuordnung.ges,varClustering2, compareMethod=1))
+    
+    results <- getResults(corM, toSimulate,zuordnung.ges, comparing=1)
+    results <- c(results,  varClustResult, varClustResult2)
+    
+    rs[i,] <- results
+    
+    print(rs)
   }
   
   rownames(rs) <- c("Sim1", "Sim2", "Sim3")

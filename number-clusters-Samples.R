@@ -23,7 +23,7 @@ numcluadvanced <- function (data,nobs,nrep,type="kmeans") {
     dist <- getDist(cor, F)
     fit <- cmdscale(d=dist,eig=TRUE, k=dim) # k is the number of dim
     points <- fit$points
-    number.cluster <- getClusterNumbers(points=points,cor.sp = cor, type=type, n=nobs)
+    number.cluster <- getClusterNumbers(points=points,cor.sp = cor, type=type, n=nobs, data=daten.sp)
     
     
     print( number.cluster)
@@ -54,7 +54,7 @@ numcluadvanced.whole <- function (data,type="kmeans", numbermethod = "internal",
     points.save <<- points
     type.save <<- type
 
-    number.cluster <- getClusterNumbers(points=points, cor.sp=cor, type=type, numbermethod, n=n)
+    number.cluster <- getClusterNumbers(points=points, cor.sp=cor, type=type, numbermethod, n=n, data=daten.sp)
  
     print( number.cluster)
     v <- number.cluster 
@@ -64,7 +64,7 @@ numcluadvanced.whole <- function (data,type="kmeans", numbermethod = "internal",
 
 
 
-getClusterNumbers <- function(points,cor.sp, type="kmeans", numbermethod="internal", n) {
+getClusterNumbers <- function(points,cor.sp, type="kmeans", numbermethod="internal", n, data) {
   
   validationtype <- c("internal")
   if(numbermethod %in% c("APN", "ADM", "AD", "FOM")) {
@@ -120,14 +120,15 @@ getClusterNumbers <- function(points,cor.sp, type="kmeans", numbermethod="intern
     names(result) <- result.names
   } else if(type=="varclust") {
     
-    dist.m <- dist(points, method="euclidean")
+    dist.m <- getDist(cor, asdist=F)
     dunns <- c()
     conns<- c()
     sills <- c()
     for(t in 2:(minv-1)) {
-      cluster <- varClust(points, k=t)
-      dist.m = dist(t(points), method="euclidean")
-      names(cluster) <- rownames(as.matrix(dist.m))
+      print(t)
+      cluster <- varClust(data, k=t)
+     # dist.m = as.matrix(dist(t(points), method="euclidean"))
+      #names(cluster) <- rownames(as.matrix(dist.m))
       conns <- append(conns,connectivity(dist.m, cluster))
       dunns <- append(dunns,dunn(dist.m, cluster))
       sil <- silhouette(cluster, dist.m)

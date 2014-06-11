@@ -144,7 +144,7 @@ NL.one <- function(x){
   
   set.seed(1000)
   for (i in 1:nrow(y)) {
-    y[i,-which.max(y[i,])][sample(1:4,1,replace=T)]=sqrt(syst.var(x)[i])
+    y[i,-which.max(y[i,])][sample(dim(x)[2]-1,1,replace=T)]=sqrt(syst.var(x)[i])
   }
   y
 }
@@ -158,7 +158,7 @@ NL.two <- function(x){
   
   set.seed(1000)
   for (i in 1:nrow(y)) {
-    y[i,-which.max(y[i,])][sample(1:4,2,replace=T)]=sqrt(syst.var(x)[i]/2)
+    y[i,-which.max(y[i,])][sample(dim(x)[2]-1,2,replace=T)]=sqrt(syst.var(x)[i]/2)
   }
   y
 }

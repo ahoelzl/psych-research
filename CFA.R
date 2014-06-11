@@ -89,7 +89,7 @@ getCFASimiliarity <- function(facs, nobs,methods, daten.sp1, daten.sp2,  efa=F) 
   for(h  in 1:length(methods)) {
     method <- methods[h]
     
-  method.names.normal <- c("Connectivity", "Dunn" ,"Silhouette")
+  method.names.normal <- c( "Connectivity", "Dunn" ,"Silhouette")
   
   measures <- c()
     

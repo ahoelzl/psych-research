@@ -179,7 +179,7 @@ cmdsolve <- function(corM,k=5, dim=0) {
   if(dim == 0) {
     dim <- dim.max
   }
- # dcomp <- getDist(corM,F)
+  # dcomp <- getDist(corM,F)
   fit <- cmdscale(d,eig=TRUE, k=dim) # k is the number of dim
   fit # view results
   clustering <- kmeans(fit$points, centers=k,nstart=5)
@@ -196,7 +196,7 @@ cmdsolve <- function(corM,k=5, dim=0) {
   
   distpoints <- dist(fit$points, upper=T, diag=T)
   corPoints <- as.matrix(1 - 2*distpoints^2)
-
+  
   centerCors <- as.matrix(1 - 2*distmatrix^2)
   centerCors <- t(centerCors)
   varimax(centerCors)
@@ -213,8 +213,8 @@ cmdsolve <- function(corM,k=5, dim=0) {
 cmdsolve.loading <- function(corM,k=5, dim=0) {
   d <- getDist(corM,T)
   
-#  sign <- sign(as.matrix(d)*corM)
- # diag(sign) <- 1
+  #  sign <- sign(as.matrix(d)*corM)
+  # diag(sign) <- 1
   dim.max <-  dim(corM)[1] - 1
   if(dim == 0) {
     dim <- dim.max
@@ -246,7 +246,7 @@ cmdsolve.loading <- function(corM,k=5, dim=0) {
   distmatrix <- t(distmatrix)
   
   names(kmeans) <- rownames(corM)
-#  centerCors <- centerCors * sign
+  #  centerCors <- centerCors * sign
   centerCors
 }
 
@@ -261,10 +261,10 @@ kmeansCor <- function(corM,k=5) {
 
 kmeansCor.loading <- function(corM,k=5) {
   
- km <-   kmeans(corM, centers=k,nstart=1)
+  km <-   kmeans(corM, centers=k,nstart=1)
   cluster <- km$cluster
- 
- centers <- t(km$centers)
+  
+  centers <- t(km$centers)
 }
 
 
@@ -308,7 +308,7 @@ kMeansOnDistancesCor <- function(corM,k=5) {
 
 
 varClust <- function(cor.sp,k) {
-
+  
   clust2 <- kmeansvar(cor.sp, init = k, nstart=100)
   clust2$cluster
 }

@@ -2,7 +2,7 @@ library(ClustOfVar)
 source("Daten_einlesen.R")
 
 #dann wird der IST Datensatz verwendet
-#source("data_analysis.R")
+source("data_analysis.R")
 source("GesamtDatenAnalysen.R")
 
 source("number-clusters-Samples.R")
@@ -67,30 +67,30 @@ clusternumber.names <<- method.names.normal
 method.names <- method.names.normal
 allnobs <-c(100,200, 500,1000)
 
-nrep <- 100
+nrep <- 1
 nobs <- 100
-numbercluster <- 5
+numbercluster <- 3
 
 
 #runCFR.loading(nrep=nrep, nobs=nobs)
 
 runCFR(nrep=nrep, nobs=nobs)
 
-test1 <- getClusterSimiliarity.simulation.methods(methods=c(1,2,3),zuordnung.ges, toSimulateOld, fa.ges) 
-test2 <- getClusterSimiliarity.simulation.samples.methods(methods=c(1,2,3), zuordnung.ges,  toSimulateOld, fa.ges, nobs=nobs, nrep=nrep)
+#test1 <- getClusterSimiliarity.simulation.methods(methods=c(1,2,3),zuordnung.ges, toSimulateOld, fa.ges) 
+test2 <- getClusterSimiliarity.simulation.samples.methods(methods=c(1,2,3), zuordnung.ges,  toSimulate, fa.ges, nobs=nobs, nrep=nrep)
 
-getClusterSimiliarity.samples(nrep=nrep,numbercluster=numbercluster)
+getClusterSimiliarity.samples(nrep=nrep,numbercluster=max(zuordnung.ges))
 
 
 res <- getClusterNumberBiasVariance.samples(nrep=nrep, types= 
                                               c("kmeans", "average", "complete", "kmeanscor",
-                                                "varclust", "varclust2","faclust",), nobs=nobs)
+                                                "varclust", "varclust2","faclust"), nobs=nobs)
 
-res <- getClusterNumberBias.simulation.methods(types= c("kmeans", "average", "complete", "kmeanscor", "varclust", "varclust2", "faclust"), 
-                                       methods=c(1,2,3), fa.ges)
+#res <- getClusterNumberBias.simulation.methods(types= c("kmeans", "average", "complete", "kmeanscor", "faclust"), 
+#                                       methods=c(1,2,3), fa.ges)
 
 
-r1 <- getClusterNumberBias.simulation.methods.samples(types= c("kmeans", "average", "complete","kmeanscor", "faclust"),
+r1 <- getClusterNumberBias.simulation.methods.samples(types= c("kmeans", "average", "complete","kmeanscor","varclust", "varclust2", "faclust"),
                                                       methods=c(1,2,3), fa.ges,  nobs=nobs, nrep=nrep)
 
 

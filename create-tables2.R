@@ -63,25 +63,25 @@ clusternumber.names <<- method.names.normal
 method.names <- method.names.normal
 allnobs <-c(100,200, 500,1000)
 
-nrep <- 400
+nrep <- 1
 nobs <- 100
 numbercluster <- 5
 
 runCFR(nrep=nrep, nobs=nobs)
 
-test1 <- getClusterSimiliarity.simulation.methods(methods=c(1,2,3),zuordnung.ges, toSimulateOld, fa.ges) 
+#test1 <- getClusterSimiliarity.simulation.methods(methods=c(1,2,3),zuordnung.ges, toSimulateOld, fa.ges) 
 test2 <- getClusterSimiliarity.simulation.samples.methods(methods=c(1,2,3), zuordnung.ges,  toSimulateOld, fa.ges, nobs=nobs, nrep=nrep)
 
 getClusterSimiliarity.samples(nrep=nrep,numbercluster=numbercluster)
 
 
-res <- getClusterNumberBiasVariance.samples(nrep=nrep, types= c("kmeans", "average", "complete","kmeanscor", "faclust"), nobs=nobs)
+res <- getClusterNumberBiasVariance.samples(nrep=nrep, types= c("kmeans", "average", "complete","kmeanscor","clustofvar","clustofvar2", "faclust"), nobs=nobs)
 
-res <- getClusterNumberBias.simulation.methods(types= c("kmeans", "average", "complete", "kmeanscor","faclust"), 
-                                               methods=c(1,2,3), fa.ges)
+#res <- getClusterNumberBias.simulation.methods(types= c("kmeans", "average", "complete", "kmeanscor","faclust"), 
+#                                               methods=c(1,2,3), fa.ges)
 
 
-r1 <- getClusterNumberBias.simulation.methods.samples(types= c("kmeans", "average", "complete","kmeanscor", "faclust"),
+r1 <- getClusterNumberBias.simulation.methods.samples(types= c("kmeans", "average", "complete","kmeanscor","clustofvar","clustofvar2", "faclust"),
                                                       methods=c(1,2,3), fa.ges,  nobs=nobs, nrep=nrep)
 
 
