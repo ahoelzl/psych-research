@@ -326,8 +326,6 @@ getCFASimiliarity.loading <- function(facs, nobs,methods, daten.sp1, daten.sp2, 
 
 runCFR <- function(nrep, nobs, methods = c("efa", "averagecor","completecor", "kmeansmds", "kmeanscor", "clustofvar", "clustofvar2")) {
 
-
-
 results <- c()
 
 results.matrix <- matrix(0, ncol=length(methods), nrow=length(method.names.normal)+4)

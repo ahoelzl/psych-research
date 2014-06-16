@@ -127,7 +127,7 @@ getClusterNumbers <- function(points,cor.sp, type="kmeans", numbermethod="intern
     for(t in 2:(minv-1)) {
       print(t)
       cluster <- varClust(data, k=t)
-     # dist.m = as.matrix(dist(t(points), method="euclidean"))
+      dist.m = 1- cor.sp
       #names(cluster) <- rownames(as.matrix(dist.m))
       conns <- append(conns,connectivity(dist.m, cluster))
       dunns <- append(dunns,dunn(dist.m, cluster))
@@ -142,14 +142,14 @@ getClusterNumbers <- function(points,cor.sp, type="kmeans", numbermethod="intern
     result <- c(con, which.max(dunns)+1,which.max(sills)+1)
     
     } else if(type=="varclust2"){
-      dist.m <- dist(points, method="euclidean")
+
       dunns <- c()
       conns<- c()
       sills <- c()
       for(t in 2:(minv-1)) {
-        cluster <- varClust2(points, k=t)
-        dist.m = dist(t(points), method="euclidean")
-        names(cluster) <- rownames(as.matrix(dist.m))
+        cluster <- varClust2(data, k=t)
+        dist.m = 1 - cor.sp
+        #names(cluster) <- rownames(as.matrix(dist.m))
         conns <- append(conns,connectivity(dist.m, cluster))
         dunns <- append(dunns,dunn(dist.m, cluster))
         sil <- silhouette(cluster, dist.m)

@@ -199,6 +199,7 @@ getClusterNumberBias.simulation.methods <- function(types, methods, fa.ges) {
     loads <- NL.two(fa.ges$loadings)
   }
   
+  
   zuordnung.ges <- apply(loads,1,function(x) which.max(abs(x)))
   
   Phi <- Phi.fixed(fa.ges$Phi, 0)
@@ -212,7 +213,7 @@ getClusterNumberBias.simulation.methods <- function(types, methods, fa.ges) {
 
   
   for(i in 1:(length(types))) {
-  r <- drawNumberClusterAdvanced.simulation(cor,1,types[i], n=100, whole.number= max(zuordnung.ges), data=data)
+  r <- drawNumberClusterAdvanced.simulation(cor,1,types[i], n=100, whole.number= dim(fa.ges$loadings)[2], data=data)
 
   cat("r: ", r)
   method.names.size <- 3
@@ -270,9 +271,9 @@ getClusterNumberBias.simulation.methods <- function(types, methods, fa.ges) {
 
 getClusterNumberBias.simulation.methods.samples <- function(types, methods, fa.ges, nobs=200, nrep=1000) {
   
-  number.matrix1 <- matrix(nrow=nrep, ncol=46)
-  number.matrix2 <- matrix(nrow=nrep, ncol=46)
-  number.matrix3 <- matrix(nrow=nrep, ncol=46)
+  number.matrix1 <- matrix(nrow=nrep, ncol=22)
+  number.matrix2 <- matrix(nrow=nrep, ncol=22)
+  number.matrix3 <- matrix(nrow=nrep, ncol=22)
   
   for(c in 1:nrep) {
   
@@ -313,7 +314,7 @@ getClusterNumberBias.simulation.methods.samples <- function(types, methods, fa.g
     corM <- sim.structure(fx=loads,Phi=Phi, uniq=fa.ges$uniquenesses, n=nobs, raw=F, items=T, cat=5)$r
     data <-  sim.structure(fx=loads,Phi=Phi, uniq=fa.ges$uniquenesses, n=nobs, raw=T, items=T, cat=5)$observed
     
-    
+    cor <- corM
     
     
     
@@ -362,6 +363,8 @@ getClusterNumberBias.simulation.methods.samples <- function(types, methods, fa.g
   mean2 <-   apply(number.matrix2, FUN=mean, MARGIN=2)
   mean3 <-   apply(number.matrix3, FUN=mean, MARGIN=2)
   
+  whole <- rep(dim(fa.ges$loadings)[2],  length(mean1))
+  
   mean1 <- na.omit(mean1)
   mean2 <- na.omit(mean2)
   mean3 <- na.omit(mean3)
@@ -376,7 +379,7 @@ getClusterNumberBias.simulation.methods.samples <- function(types, methods, fa.g
 
   
   
-  mean.matrix <- (cbind(rs.clustermethod, rs.clusternumber, mean1,mean2,mean3))
+  mean.matrix <- (cbind(rs.clustermethod, rs.clusternumber,whole, mean1,mean2,mean3))
   
   var.matrix <- (cbind(rs.clustermethod, rs.clusternumber, var1,var2,var3))
   

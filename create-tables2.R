@@ -1,6 +1,6 @@
 library(ClustOfVar)
 source("Daten_einlesen.R")
-source("data_analysis.R")
+
 source("GesamtDatenAnalysen.R")
 source("number-clusters-Samples.R")
 source("number-clusters-Simulation.R")

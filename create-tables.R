@@ -76,10 +76,11 @@ numbercluster <- 3
 
 runCFR(nrep=nrep, nobs=nobs)
 
-#test1 <- getClusterSimiliarity.simulation.methods(methods=c(1,2,3),zuordnung.ges, toSimulateOld, fa.ges) 
-test2 <- getClusterSimiliarity.simulation.samples.methods(methods=c(1,2,3), zuordnung.ges,  toSimulate, fa.ges, nobs=nobs, nrep=nrep)
 
 getClusterSimiliarity.samples(nrep=nrep,numbercluster=max(zuordnung.ges))
+
+#test1 <- getClusterSimiliarity.simulation.methods(methods=c(1,2,3),zuordnung.ges, toSimulateOld, fa.ges) 
+test2 <- getClusterSimiliarity.simulation.samples.methods(methods=c(1,2,3), zuordnung.ges,  toSimulate, fa.ges, nobs=nobs, nrep=nrep)
 
 
 res <- getClusterNumberBiasVariance.samples(nrep=nrep, types= 
