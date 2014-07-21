@@ -153,7 +153,8 @@ getClusterNumberBias.simulation.methods.original <- function(method, fa.ges) {
   
   zuordnung.ges <- apply(loads,1,function(x) which.max(abs(x)))
   
-  Phi <- Phi.fixed(fa.ges$Phi, 0)
+  Phi <- fa.ges$Phi
+  set.seed( as.integer((as.double(Sys.time())*1000+Sys.getpid()) %% 2^31) )
   corM <- sim.structure(fx=loads,Phi=Phi,n=0)$model
   
   types <- c("kmeans", "average", "complete")
@@ -202,11 +203,13 @@ getClusterNumberBias.simulation.methods <- function(types, methods, fa.ges) {
   
   zuordnung.ges <- apply(loads,1,function(x) which.max(abs(x)))
   
-  Phi <- Phi.fixed(fa.ges$Phi, 0)
+  Phi <- fa.ges$Phi
     
    # for(z in 1:nrep) {
-  corM <- sim.structure(fx=loads,Phi=Phi, uniq=fa.ges$uniquenesses, n=nobs, raw=F, items=T, cat=5)$r
-  data <-  sim.structure(fx=loads,Phi=Phi, uniq=fa.ges$uniquenesses, n=nobs, raw=T, items=T, cat=5)$observed
+  set.seed( as.integer((as.double(Sys.time())*1000+Sys.getpid()) %% 2^31) )
+  sim <- sim.structure(fx=loads,Phi=Phi, uniq=fa.ges$uniquenesses, n=nobs, raw=F, items=T, cat=5)
+  corM <- sim$r
+  data <- sim$observed
   
   
  
@@ -271,9 +274,14 @@ getClusterNumberBias.simulation.methods <- function(types, methods, fa.ges) {
 
 getClusterNumberBias.simulation.methods.samples <- function(types, methods, fa.ges, nobs=200, nrep=1000) {
   
-  number.matrix1 <- matrix(nrow=nrep, ncol=22)
-  number.matrix2 <- matrix(nrow=nrep, ncol=22)
-  number.matrix3 <- matrix(nrow=nrep, ncol=22)
+  number.matrix1 <- matrix(nrow=nrep, ncol=46)
+  number.matrix2 <- matrix(nrow=nrep, ncol=46)
+  number.matrix3 <- matrix(nrow=nrep, ncol=46)
+  number.matrix4 <- matrix(nrow=nrep, ncol=46)
+  number.matrix5 <- matrix(nrow=nrep, ncol=46)
+  
+  items <- T
+
   
   for(c in 1:nrep) {
   
@@ -284,8 +292,8 @@ getClusterNumberBias.simulation.methods.samples <- function(types, methods, fa.g
   r.names <- c()
   descriptions <- ""
   
-  rs <- matrix(nrow=(length(types)-1)*length(method.names) + length(method.names.EFA), ncol=5)
-  colnames(rs) <- c("clustermethod", "clusternumber" , "Sim1", "Sim2", "Sim3")
+  rs <- matrix(nrow=46, ncol=7)
+  colnames(rs) <- c("clustermethod", "clusternumber" , "Sim1", "Sim2", "Sim3", "Sim4", "Sim5")
   
   colnames.rs <- c()
   
@@ -304,28 +312,50 @@ getClusterNumberBias.simulation.methods.samples <- function(types, methods, fa.g
       loads <- NL.one(fa.ges$loadings)
     } else if(method == 3) {
       loads <- NL.two(fa.ges$loadings)
+    } else if(method==4) {
+      loads <- NL.original(fa.ges$loadings)
+    } else if(method==5) {
+      loads <- NL.original(fa.ges$loadings)
     }
     
     zuordnung.ges <- apply(loads,1,function(x) which.max(abs(x)))
     
-    Phi <- Phi.fixed(fa.ges$Phi, 0)
+    Phi <- fa.ges$Phi
     
     # for(z in 1:nrep) {
-    corM <- sim.structure(fx=loads,Phi=Phi, uniq=fa.ges$uniquenesses, n=nobs, raw=F, items=T, cat=5)$r
-    data <-  sim.structure(fx=loads,Phi=Phi, uniq=fa.ges$uniquenesses, n=nobs, raw=T, items=T, cat=5)$observed
+    set.seed( as.integer((as.double(Sys.time())*1000+Sys.getpid()) %% 2^31) )
+    if(method==5) {
+      sim <-  sim.structure.stella(fx=loads,Phi=Phi, uniq=fa.ges$residual, n=nobs,  items=T, cat=5)
+    } else {
+    sim <-  sim.structure(fx=loads,Phi=Phi, uniq=fa.ges$uniquenesses, n=nobs,  items=T, cat=5)
+    }
+    corM <- sim$r
+    data <-  sim$observed
     
-    cor <- corM
-    
+    cors <- corM
+    if(method==2) {
+    print("##############################")
+    print("##############################")
+    print(cors[1,2])
+    cat("method ", m)
+    print("###############################")
+    print("##############################")
+    }
     
     
     for(i in 1:(length(types))) {
-      r <- drawNumberClusterAdvanced.simulation(cor,1,types[i], n=nobs, whole.number=max(zuordnung.ges), data=data)
-      
-      cat("r: ", r)
+    
+      r <- drawNumberClusterAdvanced.simulation(cor=cors,1,types[i], n=nobs, whole.number=max(zuordnung.ges), data=data)
+      if(types[i] == "kmeans") {
+      print(types[i])
+      print( r)
+      }
       method.names.size <- 3
+      method.names <- c("Connectivity","Dunn","Silhouette")
       
       if(types[i]=="faclust") {
         method.names.size <- length(method.names.EFA)
+        method.names <- c("MAP","Paralell-ncomp","Paralell-nfact", "AIC")
       }
       
       for(mn in 1:method.names.size) {
@@ -346,10 +376,13 @@ getClusterNumberBias.simulation.methods.samples <- function(types, methods, fa.g
     
     # }
   }
-  
+ 
+    
   number.matrix1[c,] <- as.numeric(rs[,3])
   number.matrix2[c,] <- as.numeric(rs[,4])
   number.matrix3[c,] <- as.numeric(rs[,5])
+  number.matrix4[c,] <- as.numeric(rs[,6])
+  number.matrix5[c,] <- as.numeric(rs[,7])
   
   rownames(rs) <- colnames.rs
   
@@ -359,34 +392,43 @@ getClusterNumberBias.simulation.methods.samples <- function(types, methods, fa.g
   rs.clustermethod <- na.omit(rs[,1])
   rs.clusternumber<- na.omit(rs[,2])
   
+  
   mean1 <-   apply(number.matrix1, FUN=mean, MARGIN=2)
   mean2 <-   apply(number.matrix2, FUN=mean, MARGIN=2)
   mean3 <-   apply(number.matrix3, FUN=mean, MARGIN=2)
+  mean4 <-   apply(number.matrix4, FUN=mean, MARGIN=2)
+  mean5 <-   apply(number.matrix5, FUN=mean, MARGIN=2)
+  
+  mean1 <- round(na.omit(mean1),2)
+  mean2 <- round(na.omit(mean2),2)
+  mean3 <- round(na.omit(mean3),2)
+  mean4 <- round(na.omit(mean4),2)
+  mean5 <- round(na.omit(mean5),2)
   
   whole <- rep(dim(fa.ges$loadings)[2],  length(mean1))
   
-  mean1 <- na.omit(mean1)
-  mean2 <- na.omit(mean2)
-  mean3 <- na.omit(mean3)
+  
+  var1 <-   round(sqrt(na.omit(apply(number.matrix1, FUN=var, MARGIN=2))),2)
+  var2 <-   round(sqrt(na.omit(apply(number.matrix2, FUN=var, MARGIN=2))),2)
+  var3 <-   round(sqrt(na.omit(apply(number.matrix3, FUN=var, MARGIN=2))),2)
+  var4 <-   round(sqrt(na.omit(apply(number.matrix4, FUN=var, MARGIN=2))),2)
+  var5 <-   round(sqrt(na.omit(apply(number.matrix5, FUN=var, MARGIN=2))),2)
+  
+
+  rs.clustermethod <- c(rep(types, each=3),"faclust")
+  rs.clusternumber <- c(rep(c("Connectivity", "Dunn","Silhouette"),6), "MAP","Paralell-mcomp","Paralell-nfact","AIC")
+  
+  mean.matrix <- (cbind(rs.clustermethod, rs.clusternumber,whole, mean1,mean2,mean3,mean4, mean5))
+  
+  var.matrix <- (cbind(rs.clustermethod, rs.clusternumber, var1,var2,var3,var4, var5))
   
 
   
-  
-  var1 <-   apply(number.matrix1, FUN=var, MARGIN=2)
-  var2 <-   apply(number.matrix2, FUN=var, MARGIN=2)
-  var3 <-   apply(number.matrix3, FUN=var, MARGIN=2)
-  
-
-  
-  
-  mean.matrix <- (cbind(rs.clustermethod, rs.clusternumber,whole, mean1,mean2,mean3))
-  
-  var.matrix <- (cbind(rs.clustermethod, rs.clusternumber, var1,var2,var3))
   
   paintTable(mean.matrix, "durchsch. Clusteranzahlsabweichung bei EFA-Similation mit 5 Faktoren", 
              paste0(" \n ", descriptions)) 
   
-  paintTable(var.matrix, "Varianz der Clusteranzahlsabweichung bei EFA-Similation mit 5 Faktoren", 
+  paintTable(var.matrix, "Std.-abweichung der Clusteranzahlsabweichung bei EFA-Similation mit 5 Faktoren", 
              paste0(" \n ", descriptions, " nrep ", nrep, " nobs ", nobs)) 
 }
 

@@ -375,7 +375,7 @@ s <- s
 
 avgsum <- sum(s)/(49-3) 
 
-s <- s - avgsum
+#s <- s - avgsum
 s[c(1,2,3),1] <- 0
 
 

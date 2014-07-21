@@ -66,6 +66,8 @@ numcluadvanced.whole <- function (data,type="kmeans", numbermethod = "internal",
 
 getClusterNumbers <- function(points,cor.sp, type="kmeans", numbermethod="internal", n, data) {
   
+  print(cat("type ", type))
+  
   validationtype <- c("internal")
   if(numbermethod %in% c("APN", "ADM", "AD", "FOM")) {
     validationtype <- c("stability")
@@ -79,7 +81,7 @@ getClusterNumbers <- function(points,cor.sp, type="kmeans", numbermethod="intern
   minv <- min(dims-1, 10)
   
   if(type=="kmeans" || type=="kmeansmds") {
-    result <- clValid(obj=points, nClust=2:minv,clMethods="kmeans", validation=c(validationtype), verbose=T)
+    result <- clValid(obj=points, nClust=2:minv,clMethods="kmeans", validation=c(validationtype), verbose=F)
     result.names <-  measNames(result)
      #result <-   as.numeric(as.character(optimalScores(result)[,3]))
     measures <- measures(result)
@@ -118,9 +120,9 @@ getClusterNumbers <- function(points,cor.sp, type="kmeans", numbermethod="intern
       result[1] <- 2
     }
     names(result) <- result.names
-  } else if(type=="varclust") {
+  } else if(type=="varclust" || type=="clustofvar") {
     
-    dist.m <- getDist(cor, asdist=F)
+    dist.m <- 1 - cor.sp
     dunns <- c()
     conns<- c()
     sills <- c()
@@ -141,7 +143,7 @@ getClusterNumbers <- function(points,cor.sp, type="kmeans", numbermethod="intern
     }
     result <- c(con, which.max(dunns)+1,which.max(sills)+1)
     
-    } else if(type=="varclust2"){
+    } else if(type=="varclust2" || type=="clustofvar2"){
 
       dunns <- c()
       conns<- c()
@@ -234,9 +236,9 @@ if(type=="kmeans")   {
   whole.cluster.number <-  whole.cluster.number.kmeanscor
 } else if(type=="kmeansmds") {
   whole.cluster.number <- whole.cluster.number.kmeans
-} else if(type=="varclust"){
+} else if(type=="clustofvar" || type == "varclust"){
   whole.cluster.number <- whole.cluster.number.varclust
-} else if(type=="varclust2"){
+} else if(type=="clustofvar2" || type=="varclust2"){
   whole.cluster.number <- whole.cluster.number.varclust2
 }
 
@@ -262,7 +264,12 @@ result.names <- c("whole", "Var", "Bias")
           whole.number <- unlist(whole.number)
         }
         
+        print(vector)
         v <-  vector[[i]][j]
+        print(cat(" i ", i, " j ", j))
+       print(cat(" whole number ", whole.number)) 
+        
+        print(cat(" v ", v)) 
         
         if(class(v)=="list") {
           v <- unlist(v)
@@ -314,8 +321,11 @@ whole.cluster.number.average <- numcluadvanced.whole(facs, type="average")
 whole.cluster.number.complete <- numcluadvanced.whole(facs, type="complete")
 whole.cluster.number.faclust <- numcluadvanced.whole(facs, type="faclust", n=dim(facs)[1])
 whole.cluster.number.kmeanscor <- numcluadvanced.whole(facs, type="kmeanscor")
+print("ante")
 whole.cluster.number.varclust <- numcluadvanced.whole(facs, type="varclust")
+print("post")
 whole.cluster.number.varclust2 <- numcluadvanced.whole(facs, type="varclust2")
+
 #}
 
 
@@ -346,7 +356,7 @@ rs[1, (i-1) * length(method.names) + 1] <- types[i]
 
 }
   
-  rownames(rs) <- c("clustertype", "clusternumber", "whole", "Var", "Bias")
+  rownames(rs) <- c("clustertype", "clusternumber", "whole", "Sd", "Bias")
   
   
   names <-  rs[2,] %in% c("APN","AD","ADM","FOM",NA) 
@@ -357,12 +367,14 @@ rs[1, (i-1) * length(method.names) + 1] <- types[i]
   
   clusternumber <- rs[2,][!names]
   whole <- rs[3,][!numbers]
-  var <- rs[4,][!numbers]
-  bias <- rs[5,][!numbers]
+  var <- round(sqrt(as.numeric(rs[4,][!numbers])),2)
+  bias <- round(as.numeric(rs[5,][!numbers]),2)
+  
+  
   
   result <- cbind(clustertype, clusternumber, whole,var,bias)
   
-result
+#result
   
   paintTable(result, "Clusteranzahlsgenauigkeit bei Samples", paste0("type ",type, " nobs ", nobs))
 }

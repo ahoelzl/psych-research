@@ -128,6 +128,9 @@ syst.var  <-  function(x) {
   rowSums(abs(result))
 }
 
+NL.original <- function(x){
+  x
+}
 
 NL.equal <- function(x){
   for (i in 1:nrow(x)) {

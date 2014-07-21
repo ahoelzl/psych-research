@@ -16,7 +16,7 @@ addError <- F
 paintTable <- function(table, title,footnote) {
   
   title <- gsub(" ", "", title)
-  filename <- paste0("currentresults2/",title,".jpeg")
+  filename <- paste0("solveallNEO-200/",title,".jpeg")
   print(filename)
   jpeg(filename, width=1000, height=1000)
   
@@ -49,7 +49,7 @@ paintTable <- function(table, title,footnote) {
   grid.draw(gt)
   dev.off()
   
-  write.matrix(table.original, file=paste0("currentresults2/",title,".txt"))
+  write.matrix(table.original, file=paste0("solveallNEO-1000/",title,".txt"))
   
 }
 
@@ -66,13 +66,13 @@ method.names <- method.names.normal
 allnobs <-c(100,200, 500,1000)
 
 nrep <- 500
-nobs <- 100
+nobs <- 200
 numbercluster <- 5
 
 #runCFR(nrep=nrep, nobs=nobs)
 
 #test1 <- getClusterSimiliarity.simulation.methods(methods=c(1,2,3),zuordnung.ges, toSimulateOld, fa.ges) 
-#test2 <- getClusterSimiliarity.simulation.samples.methods(methods=c(1,2,3,4,5), zuordnung.ges,  toSimulate, fa.ges, nobs=nobs, nrep=nrep)
+test2 <- getClusterSimiliarity.simulation.samples.methods(methods=c(1,2,3,4,5), zuordnung.ges,  toSimulate, fa.ges, nobs=nobs, nrep=nrep)
 
 #getClusterSimiliarity.samples(nrep=nrep,numbercluster=numbercluster)
 
@@ -80,14 +80,11 @@ numbercluster <- 5
 res <- getClusterNumberBiasVariance.samples(nrep=nrep, types= c("kmeans", "average", "complete","kmeanscor","clustofvar","clustofvar2", "faclust"), nobs=nobs)
 
 #res <- getClusterNumberBias.simulation.methods(types= c("kmeans", "average", "complete", "kmeanscor","faclust"), 
- #                                              methods=c(1,2,3), fa.ges)
+#                                              methods=c(1,2,3), fa.ges)
 
 
 r1 <- getClusterNumberBias.simulation.methods.samples(types= c("kmeans", "average", "complete","kmeanscor","clustofvar","clustofvar2", "faclust"),
                                                       methods=c(1,2,3,4,5), fa.ges,  nobs=nobs, nrep=nrep)
-
-
-
 
 
 

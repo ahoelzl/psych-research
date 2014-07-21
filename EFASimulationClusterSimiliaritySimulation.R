@@ -295,7 +295,7 @@ getClusterSimiliarity.simulation.samples.methods <- function(methods, zuordnung.
   #}
   descriptions<- "bei allen NL gleich und entsprechen Kommunalität (NL.equal)"
   
-  rs <- matrix(nrow= 3, ncol=length(toSimulate)) 
+  rs <- matrix(nrow= 5, ncol=7 )
 
 
   for( i in 1:length(methods)) {
@@ -309,7 +309,7 @@ getClusterSimiliarity.simulation.samples.methods <- function(methods, zuordnung.
     }
     
     
-    colnames(rs) <- c(toSimulate)
+    #colnames(rs) <- c(toSimulate)
     #for(i in 1:length(NL.mus))  {
     #r1 <- compareClusterings(NL.mus[i],0,Kor.mus[i],0,1,toSimulates, addError=addError)
     
@@ -323,10 +323,20 @@ getClusterSimiliarity.simulation.samples.methods <- function(methods, zuordnung.
       loads <- NL.one(fa.ges$loadings)
     } else if(method == 3) {
       loads <- NL.two(fa.ges$loadings)
+    } else if(method == 4) {
+      loads <- NL.original(fa.ges$loadings)
+    } else if(method == 5) {
+      loads <- NL.original(fa.ges$loadings)
     }
     
-    corM <- sim.structure(fx=loads,Phi=Phi, uniq=fa.ges$uniquenesses, n=nobs, raw=F, items=T, cat=5)$r
-    data <-  sim.structure(fx=loads,Phi=Phi, uniq=fa.ges$uniquenesses, n=nobs, raw=T, items=T, cat=5)$observed
+    set.seed( as.integer((as.double(Sys.time())*1000+Sys.getpid()) %% 2^31) )
+    if(method == 5) {
+      sim <-  sim.structure.stella(fx=loads,Phi=Phi, uniq=fa.ges$residual, n=nobs,raw=T,  items=T, cat=5)
+    } else {
+    sim <- sim.structure(fx=loads,Phi=Phi, uniq=fa.ges$uniquenesses, n=nobs, raw=T, items=T, cat=5)
+    }
+    corM <- sim$r
+    data <-  sim$observed
     
     
    varClustering <-  varClust(data, k=max(zuordnung.ges))
@@ -343,7 +353,7 @@ getClusterSimiliarity.simulation.samples.methods <- function(methods, zuordnung.
     print(rs)
   }
   
-  rownames(rs) <- c("Sim1", "Sim2", "Sim3")
+  rownames(rs) <- c("Sim1", "Sim2", "Sim3","Sim4","Sim5")
   rs.list[[c]] <- rs
   }
   
@@ -355,6 +365,9 @@ getClusterSimiliarity.simulation.samples.methods <- function(methods, zuordnung.
   }
   rs <- rs/length(rs.list)
   
+  print(rs)
+  
+  colnames(rs) <- toSimulate
   
   paintTable(rs, "Clusteruebereinstimmung bei EFA-Stichproben", paste0("\n" , descriptions, " nrep ", nrep, " nobs ", nobs))
   rs
